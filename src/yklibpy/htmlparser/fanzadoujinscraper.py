@@ -21,13 +21,17 @@ class FanzaDoujinScraper(Scraper):
             for idx, child in enumerate(div_tag.children, 1):
                 # print(f"子要素 {idx}: {child}")
                 print(f"子要素 {idx}: ")
-                # child内の全てのanchorタグを列挙
-                if hasattr(child, 'find_all'):
-                    anchor_tags = child.find_all("a")
-                    for anchor_idx, anchor_tag in enumerate(anchor_tags, 1):
-                        href = anchor_tag.get("href", "")
-                        text = anchor_tag.get_text(strip=True)
-                        print(f"  anchor {anchor_idx}: href={href}, text={text}")
+                # child内のclass属性がbasket-nameのbタグを探す
+                if hasattr(child, 'find'):
+                    b_tag = child.find("b", {"class": "basket-name"})
+                    if b_tag:
+                        # bタグの子要素のanchorタグを取得
+                        anchor_tag = b_tag.find("a")
+                        if anchor_tag:
+                            href = anchor_tag.get("href", "")
+                            text = anchor_tag.get_text(strip=True)
+                            print(f"  href: {href}")
+                            print(f"  text: {text}")
             print("--- 子要素の列挙終了 ---")
 
     def scrape0(self, info: Info) -> List[Dict[str, str]]:
