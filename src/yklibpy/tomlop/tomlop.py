@@ -327,7 +327,7 @@ class Tomlop:
             self.read_toml_external(self.ref_file_item.file_path)
             # print(f"self.data={self.data}")
             output_path = Path("a.yaml")
-            Util.output_yaml(self.data, output_path)
+            Util.save_yaml(self.data, output_path)
             # self.store_yaml(new_file_path, self.data)
 
     def yaml2toml(self):

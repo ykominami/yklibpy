@@ -4,9 +4,29 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 import yaml
-
+import chardet
+import locale
 
 class Util:
+
+    @classmethod
+    def ensure_file_path(cls, path: Path) -> Path:
+        if path is None:
+            return None
+        if not path.exists():
+            parent_path = path.parent
+            if not parent_path.exists():
+                parent_path.mkdir(parents=True, exist_ok=True)
+        path.touch()    
+        return path
+
+    @classmethod
+    def ensure_dir_path(cls, path: Path) -> Path:
+        if path is None:
+            return None
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
     @classmethod
     def flatten(cls, items):
         """Flatten arbitrarily nested iterables into a single list.
@@ -27,6 +47,20 @@ class Util:
         return flat_list
 
     @classmethod
+    def detect_encoding(cls, input_path: Path) -> str:
+        if input_path is not None:
+            with open(input_path, "rb") as f:
+                raw = f.read()
+                encoding = chardet.detect(raw)["encoding"]
+            return encoding
+        return None
+
+    @classmethod
+    def get_default_encoding(cls) -> str:
+        enc = locale.getpreferredencoding(False)
+        return enc
+
+    @classmethod
     def load_yaml(cls, input_path: Path) -> dict:
         """Load a YAML file and return it as a dictionary.
 
@@ -36,14 +70,16 @@ class Util:
         Returns:
             dict: Parsed YAML content.
         """
-        data = None
+        data = {}
         with open(input_path, "r", encoding="utf-8") as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
+        if data is None:
+            data = {}
         return data
 
     @classmethod
-    def output_yaml(cls, assoc: dict, output_path: Optional[Path] = None) -> str:
-        """Serialize a dictionary to YAML and optionally write it to disk.
+    def save_yaml(cls, assoc: dict, output_path: Optional[Path] = None) -> str:
+        """Serialize a dictionary to YAML and optionally save it to disk.
 
         Args:
             assoc (dict): Data to dump.
@@ -171,7 +207,7 @@ class Util:
             else:
                 value_2["Time"] = "0時間"
 
-        Util.output_yaml(dict_2, output_path)
+        Util.save_yaml(dict_2, output_path)
 
     def test_tsv(self, input_file:str, input_file_2:str, output_file:str):
         """Developer helper for merging Udemy TSV progress data.
