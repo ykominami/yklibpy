@@ -2,6 +2,7 @@ from typing import Dict, List
 from urllib.parse import parse_qs, urlparse
 
 from bs4 import BeautifulSoup
+
 from ..common.info import Info
 from .progress import Progress
 from .scraper import Scraper
@@ -30,7 +31,9 @@ class UdemyScraper(Scraper):
         append_count = 0
         no_append_count = 0
         """divの処理"""
-        for div_tag in soup.find_all("div", {"class": "enrolled-course-card--container--WJYo9"}):
+        for div_tag in soup.find_all(
+            "div", {"class": "enrolled-course-card--container--WJYo9"}
+        ):
             # print(f'div_tag={div_tag}')
             a_tag = div_tag.find("a")
             if a_tag is None:
@@ -45,7 +48,11 @@ class UdemyScraper(Scraper):
             # Extract course_id from URL parameters
 
             result = self.add_list_and_assoc(
-                url=url, text=text, course_id=course_id, instructors=instructors, progress=progress
+                url=url,
+                text=text,
+                course_id=course_id,
+                instructors=instructors,
+                progress=progress,
             )
             if result:
                 append_count += 1
@@ -56,8 +63,12 @@ class UdemyScraper(Scraper):
         info.no_append_count = no_append_count
         self.append_count += append_count
         self.no_append_count += no_append_count
-        print(f"###############   udemyscraper scrape len( self.links_list )={len(self.links_list)}")
-        print(f"###############   udemyscraper scrape len( self.links_assoc )={len(self.links_assoc)}")
+        print(
+            f"###############   udemyscraper scrape len( self.links_list )={len(self.links_list)}"
+        )
+        print(
+            f"###############   udemyscraper scrape len( self.links_assoc )={len(self.links_assoc)}"
+        )
         return self.links_list
 
     def get_instructors(self, div_tag) -> List[str]:
@@ -71,7 +82,10 @@ class UdemyScraper(Scraper):
           compatibility when not parsed further).
         """
         instructors = ["_0_"]
-        child_div = div_tag.find("div", {"data-purpose": "safely-set-inner-html:course-card:visible-instructors"})
+        child_div = div_tag.find(
+            "div",
+            {"data-purpose": "safely-set-inner-html:course-card:visible-instructors"},
+        )
         if child_div is not None:
             instructors = child_div.get_text(strip=True)
 
@@ -106,7 +120,9 @@ class UdemyScraper(Scraper):
             Progress: Object encapsulating min/max/current values.
         """
         # meter_div = div_tag.find('div', {'data-purpose': 'meter'})
-        meter_div = div_tag.find("div", {"class": "ud-meter meter-module--meter--9-BwT"})
+        meter_div = div_tag.find(
+            "div", {"class": "ud-meter meter-module--meter--9-BwT"}
+        )
 
         meter = ["_0_"]
         meter_str = ""
@@ -123,11 +139,18 @@ class UdemyScraper(Scraper):
         else:
             print(f"#### meter2={meter}")
 
-        progress = Progress(meter_str=meter_str, valuemin=valuemin, valuemax=valuemax, valuenow=valuenow)
+        progress = Progress(
+            meter_str=meter_str, valuemin=valuemin, valuemax=valuemax, valuenow=valuenow
+        )
         return progress
 
     def add_list_and_assoc(
-        self, url: str, text: str, course_id: str, instructors: List[str], progress: Progress
+        self,
+        url: str,
+        text: str,
+        course_id: str,
+        instructors: List[str],
+        progress: Progress,
     ) -> bool:
         """Insert a new record if the ``course_id`` has not been seen.
 
@@ -146,7 +169,11 @@ class UdemyScraper(Scraper):
             # instructors = instructors.split(',')
             # print(f'#### add_list_and_assoc instructors={instructors}')
             record = self.make_record(
-                url=url, text=text, course_id=course_id, instructors=instructors, progress=progress
+                url=url,
+                text=text,
+                course_id=course_id,
+                instructors=instructors,
+                progress=progress,
             )
             # record = self.make_record(url, text, course_id)
             # print(f'=1 record1={record}')
@@ -161,7 +188,12 @@ class UdemyScraper(Scraper):
         return result
 
     def make_record(
-        self, url: str, text: str, course_id: str, instructors: List[str], progress: Progress | Dict
+        self,
+        url: str,
+        text: str,
+        course_id: str,
+        instructors: List[str],
+        progress: Progress | Dict,
     ) -> Dict[str, str]:
         """Construct the normalized record stored in outputs.
 
@@ -190,7 +222,9 @@ class UdemyScraper(Scraper):
         if not parsed.scheme:
             raise ValueError(f"URL '{url}' is not a valid URI: missing scheme")
         if not parsed.netloc and not parsed.path and not parsed.fragment:
-            raise ValueError(f"URL '{url}' is not a valid URI: missing authority, path, or fragment")
+            raise ValueError(
+                f"URL '{url}' is not a valid URI: missing authority, path, or fragment"
+            )
         # progress_yml = progress.to_yml()
         record = {
             "URL": url,
@@ -202,7 +236,9 @@ class UdemyScraper(Scraper):
         # print(f'0 record0={record}')
         return record
 
-    def get_link_array(self, extracted_links: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    def get_link_array(
+        self, extracted_links: List[Dict[str, str]]
+    ) -> List[Dict[str, str]]:
         """Convert associative link data into a list of records.
 
         Args:
@@ -211,7 +247,9 @@ class UdemyScraper(Scraper):
         Returns:
             List[Dict[str, str]]: Cloned records via :meth:`make_record`.
         """
-        print(f"###############   get_link_array len(extracted_links)={len(extracted_links)}")
+        print(
+            f"###############   get_link_array len(extracted_links)={len(extracted_links)}"
+        )
         return [
             self.make_record(
                 url=link["URL"],

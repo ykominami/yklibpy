@@ -1,18 +1,20 @@
-import sys
 from pathlib import Path
 from typing import List
 
+from ..common.env import Env
+from .amazonsavedcartscraper import AmazonSavedCartScraper
+
 # from .ascraper import AScraper
 from .ascraper import AScraper
-from ..common.env import Env
+from .fanzadoujinpurchasedscraper import FanzaDoujinPurchasedScraper
+from .fanzadoujinscraper import FanzaDoujinScraper
 from .h3scraper import H3Scraper
 from .kuscraper import KUScraper
-from .fanzadoujinscraper import FanzaDoujinScraper
-from .fanzadoujinboughtscraper import FanzaDoujinBoughtScraper
 from .scraper import Scraper
 
 # from progress import Progress
 from .udemyscraper import UdemyScraper
+
 
 class App:
     """
@@ -53,9 +55,13 @@ class App:
             return KUScraper()
         elif mode == "fanza_doujin":
             return FanzaDoujinScraper()
-        elif mode == "fanza_doujin_bought":
-            return FanzaDoujinBoughtScraper()
+        elif mode == "fanza_doujin_purchased":
+            return FanzaDoujinPurchasedScraper()
+        elif mode == "amazon_saved_cart":
+            # print(f'mode={mode}')
+            return AmazonSavedCartScraper()
         else:
+            print(f"mode={mode} is not supported")
             return None
 
     def loop(self, files: List[Path], mode: str):
@@ -70,17 +76,11 @@ class App:
         """
         assoc = {}
         for file in files:
-            print(f"file={file}")
             scraper = self.create_scraper(mode)
             extracted_links_assoc = scraper.get_links_assoc_from_html(file)
             if extracted_links_assoc:
-                # print(f"app.py loop Found {len(extracted_links_assoc)} links in '{file}':\n")
-                # arrayx = scraper.get_link_array(extracted_links)
-                # print(f'app.py loop len(arrayx)={len(arrayx)}')
                 if len(extracted_links_assoc) > 0:
-                    print(f"run len( extracted_links_assoc )={len(extracted_links_assoc)}")
                     assoc.update(extracted_links_assoc)
-        print(f"app.loop TOTAL len( assoc )={len(assoc)}")
         return assoc
 
     def run(self, env: Env):
@@ -96,10 +96,4 @@ class App:
         mode = env.mode()
 
         assoc = self.loop(path_array, mode)
-        print(f"app.py run len( assoc )={len(assoc)}")
-        # self.links_assoc = self.links_assoc.update(list)
         self.links_assoc.update(assoc)
-        print(f"app.py run len( self.links_assoc )={len(self.links_assoc)}")
-
-if __name__ == "__main__":
-    ymain()

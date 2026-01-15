@@ -4,7 +4,14 @@ from bs4 import BeautifulSoup
 
 
 class Info:
-    def __init__(self, file_path: Path, name: str, soup: BeautifulSoup, append_count: int, no_append_count: int):
+    def __init__(
+        self,
+        file_path: Path,
+        name: str,
+        soup: BeautifulSoup,
+        append_count: int,
+        no_append_count: int,
+    ):
         """Bundle parsed HTML and bookkeeping counters.
 
         Args:

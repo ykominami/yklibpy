@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import yaml
 
@@ -19,15 +19,17 @@ class Env:
         self.pattern = None
         self.config = {}
         self.assoc = {}
+        # print(f"config_path={config_path}")
         if config_path is not None:
             with open(config_path, "r", encoding="utf-8") as f:
                 self.assoc = yaml.load(f, Loader=yaml.FullLoader)
-                # self.config.update(self.assoc)
+                # print(list(self.assoc.keys()))
+                # list = self.assoc.keys()
+                # for key in list:
+                #     print(f"key={key}")
+
                 base_path_array = self.assoc["base_path"]
                 self.base_path = self.make_path(base_path_array)
-                # print(f'self.assoc={self.assoc}')
-                # print(f'self.config={self.config}')
-                # exit(0)
 
     def make_path(self, path_array: list[str]) -> Path | None:
         """Convert a sequence of path components into a concrete path.
@@ -40,7 +42,6 @@ class Env:
             Path | None: Composed path or ``None`` when no components exist.
         """
         base_path = None
-        # print(f"path_array={path_array}")
         if path_array is not None:
             top_dir = path_array.pop(0)
             top_path = Path(top_dir)
@@ -81,8 +82,6 @@ class Env:
         """
         self.pattern = pattern
         if pattern not in self.assoc:
-            print(f"pattern={pattern} not found")
-            self.config["mode"] = "H3"
             return None
         self.config = self.assoc[pattern]
         return self.config
@@ -93,12 +92,9 @@ class Env:
         Returns:
             List[Path]: Concrete file paths ready for scraping.
         """
-        print(f"2 self.config={self.config}")
         if len(self.config) == 0:
             return []
         else:
-            print(f"Env get_files self.config={self.config}")
-            print(f"Env get_files self.config['dir']={self.config['dir']}")
             dir_path = self.base_path / Path(*self.config["dir"])
 
             if self.config["kind"] == "file":
