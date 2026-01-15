@@ -49,7 +49,9 @@ class AScraper(UdemyScraper):
             # Extract course_id from URL parameters
             course_id = self.get_course_id_from_url(url)
             instructors = {"-"}
-            result = self.add_list_and_assoc(url=url, text=text, course_id=course_id, instructors=instructors)
+            result = self.add_list_and_assoc(
+                url=url, text=text, course_id=course_id, instructors=instructors
+            )
             if result:
                 append_count += 1
             else:

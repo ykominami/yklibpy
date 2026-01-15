@@ -1,39 +1,52 @@
 from typing import Dict, List
-from urllib.parse import urlparse
 
 from ..common.info import Info
+from ..common.util import Util
 from .scraper import Scraper
 
 
 class KUScraper(Scraper):
+    class WorkInfo:
+        def __init__(self, url: str, title: str):
+            result = Util.isValidUrls([url])
+            if result:
+                self.url = url
+                self.title = title
+            else:
+                self.url = None
+                self.title = None
+
+        def to_assoc(self):
+            return {
+                "url": self.url,
+                "titlet": self.title,
+            }
+
     def __init__(self):
         super().__init__()
 
     def scrape(self, info: Info) -> List[Dict[str, str]]:
-        print("kuscraper scrape")
+        # <div id="itemsList" class="a-section a-spacing-top-large">
+        #   <ul id="listContainer" class="a-unordered-list a-nostyle a-vertical" role="list">
+
         soup = info.soup
         """aの処理"""
-        for a_tag in soup.find_all("a"):
-            # classが"a-link-normal"でない場合はcontinue
-            if a_tag.get("class") != ["a-link-normal"]:
-                # print(f'a_tag.get("class")={a_tag.get("class")} not a-link-normal')
-                continue
-            # print(f'a_tag.get("class")={a_tag.get("class")} a-link-normal')
-            url = a_tag.get("href", "#")
-            # print(f'url={url}')
-            img_tag = a_tag.find("img")
-            # print(f'img_tag={img_tag}')
-            if img_tag:
-                text = img_tag.get("alt", "")
-            else:
-                text = a_tag.get_text(strip=True)
-            # print(f'text={text}')
-            self.add_list_and_assoc(url=url, text=text)
+        for div_tag in soup.find_all("div", {"id": "itemsList"}):
+            for a_tag in div_tag.find_all("a"):
+                if a_tag.get("class") != ["a-link-normal"]:
+                    continue
+                url = a_tag.get("href", "#")
+                img_tag = a_tag.find("img")
+                if img_tag:
+                    title = img_tag.get("alt", "")
+                else:
+                    title = a_tag.get_text(strip=True)
+                # print(f"text={text}")
+                work_info = self.WorkInfo(url=url, title=title)
+                self.add_list_and_assoc(work_info)
         return self.links_list
 
-    def add_list_and_assoc(
-        self, url: str, text: str
-    ) -> bool:
+    def add_list_and_assoc(self, work_info: WorkInfo) -> bool:
         """Insert a new record if the ``course_id`` has not been seen.
 
         Args:
@@ -44,48 +57,11 @@ class KUScraper(Scraper):
             bool: ``True`` when the record was added, else ``False``.
         """
         result = False
-        if url not in self.links_assoc.keys():
-            record = self.make_record(
-                url=url, text=text
-            )
-            # record = self.make_record(url, text, course_id)
-            # print(f'=1 record1={record}')
-
-            self.links_assoc[url] = record
-            self.links_list.append(record)
+        if work_info.url not in self.links_assoc.keys():
+            self.links_assoc[work_info.url] = work_info.to_assoc()
+            self.links_list.append(work_info)
             result = True
         else:
             pass
 
         return result
-
-    def make_record(
-        self, url: str, text: str
-    ) -> Dict[str, str]:
-        """Construct the normalized record stored in outputs.
-
-        Args:
-            url (str): Course URL, must be valid.
-            text (str): Display name.
-
-        Returns:
-            Dict[str, str]: Record containing URL/Text/Course_ID/Instructors/Progress.
-
-        Raises:
-            ValueError: If the supplied URL lacks a scheme or structure.
-        """
-        """レコードを作成する"""
-        # URI形式のチェック
-        parsed = urlparse(url)
-        if not parsed.scheme:
-            raise ValueError(f"URL '{url}' is not a valid URI: missing scheme")
-        if not parsed.netloc and not parsed.path and not parsed.fragment:
-            raise ValueError(f"URL '{url}' is not a valid URI: missing authority, path, or fragment")
-        # progress_yml = progress.to_yml()
-        record = {
-            "URL": url,
-            "Text": text,
-        }
-        # print(f'0 record0={record}')
-        return record
-

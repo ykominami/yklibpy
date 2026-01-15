@@ -1,12 +1,200 @@
 import csv
+import inspect
+import locale
+import re
 from io import StringIO
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import List, Literal, Optional, Sequence
+from urllib.parse import urlparse
 
+import chardet
 import yaml
+from bs4 import Tag
+
+TargetType = Literal["file", "dir", "both"]
+
+"""
+from __future__ import annotations
+
+import importlib
+import inspect
+import pkgutil
+
+__all__: list[str] = []
+
+def _export_classes_from_submodules() -> None:
+    package_name = __name__
+    for modinfo in pkgutil.iter_modules(__path__):  # type: ignore[name-defined]
+        mod_name = modinfo.name
+
+        # Skip private/dunder modules and entrypoints
+        if mod_name.startswith("_") or mod_name in {"main"}:
+            continue
+
+        module = importlib.import_module(f"{package_name}.{mod_name}")
+
+        for attr_name, obj in vars(module).items():
+            if inspect.isclass(obj) and getattr(obj, "__module__", None) == module.__name__:
+                globals()[attr_name] = obj
+                __all__.append(attr_name)
+
+    # stable, de-duplicated order
+    globals()["__all__"] = sorted(set(__all__))
+
+_export_classes_from_submodules()
+"""
 
 
 class Util:
+    class UniqueList:
+        def __init__(self):
+            self._set = set()
+            self._list = []
+
+        def append(self, value):
+            if value not in self._set:
+                self._set.add(value)
+                self._list.append(value)
+
+        def __iter__(self):
+            return iter(self._list)
+
+        def __repr__(self):
+            return repr(self._list)
+
+    class Result:
+        def __init__(self, success: bool, url: str, reason: str, parsed: urlparse):
+            self.success = success
+            self.url = url
+            self.reason = reason
+            self.parsed = parsed
+
+    @classmethod
+    def get_location(cls) -> str:
+        return f"{__file__}"
+
+    @classmethod
+    def get_location_string(cls) -> str:
+        """現在の位置を文字列で返す"""
+        frame = inspect.currentframe()
+        if frame and frame.f_back:
+            caller = frame.f_back
+            filename = Path(caller.f_filename).name
+            lineno = caller.f_lineno
+            function = caller.f_code.co_name
+            return f"{filename}:{lineno} in {function}"
+        return "unknown"
+
+    @classmethod
+    def xyz(cls):
+        print("xyz")
+
+    @classmethod
+    def find_paths(
+        cls,
+        base_dir: Path,
+        pattern: str,
+        target_type: TargetType = "both",
+    ) -> list[Path]:
+        """
+        指定ディレクトリ配下を再帰的に探索し、パターンに一致するパスを取得する
+
+        :param base_dir: 探索開始ディレクトリ (Path)
+        :param pattern: globパターン (例: "*.py", "data_*")
+        :param target_type: "file" | "dir" | "both"
+        :return: Path のリスト
+        """
+        if not base_dir.is_dir():
+            raise ValueError(f"{base_dir} はディレクトリではありません")
+
+        results: list[Path] = []
+
+        print(f"base_dir={base_dir}")
+        # print(f'pattern={pattern}')
+        for path in base_dir.rglob(pattern):
+            # print(f'path={path}')
+            if target_type == "file" and path.is_file():
+                results.append(path)
+            elif target_type == "dir" and path.is_dir():
+                results.append(path)
+            elif target_type == "both":
+                results.append(path)
+
+        print(f"results={results}")
+        return results
+
+    @classmethod
+    def list_files(cls, name, parts, suffix):
+        list = [f"{name}-{part}{suffix}" for part in parts]
+        return list
+
+    @classmethod
+    def is_valid_urls(cls, urls: [str]) -> str | None:
+        result_array = []
+        for url in urls:
+            if url == "" or url is None:
+                result = cls.Result(False, url, "URL is empty", None)
+                result_array.append(result)
+                continue
+
+            parsed = urlparse(url)
+            if not parsed.scheme:
+                result = cls.Result(False, url, "URL scheme is invalid", parsed)
+                result_array.append(result)
+                continue
+
+            if not parsed.netloc and not parsed.path and not parsed.fragment:
+                result = cls.Result(
+                    False,
+                    url,
+                    "URL is not a valid URI: missing authority, path, or fragment",
+                    parsed,
+                )
+                result_array.append(result)
+                continue
+
+            result = cls.Result(True, url, "URL is valid", parsed)
+            result_array.append(result)
+        return result_array
+
+    @classmethod
+    def extract_cid(cls, text: str) -> str | None:
+        m = re.search(r"cid=([^/?&]+)", text)
+        return m.group(1) if m else None
+
+    @classmethod
+    def extract_base(cls, base: str, text: str) -> str | None:
+        re_text = f"{base}=([^/?&]+)"
+        regexp = re.compile(re_text)
+        m = regexp.search(text)
+        return m.group(1) if m else None
+
+    @classmethod
+    def flatten_gen(cls, lst):
+        for item in lst:
+            if isinstance(item, list):
+                yield from Util.flatten_gen(item)
+            else:
+                yield item
+
+    @classmethod
+    def ensure_file_path(cls, path: Path) -> Path:
+        if path is None:
+            return None
+        if not path.exists():
+            parent_path = path.parent
+            if not parent_path.exists():
+                parent_path.mkdir(parents=True, exist_ok=True)
+        path.touch()
+        return path
+
+    @classmethod
+    def ensure_dir_path(cls, path: Path) -> Path:
+        if path is None:
+            return None
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
     @classmethod
     def flatten(cls, items):
         """Flatten arbitrarily nested iterables into a single list.
@@ -27,6 +215,70 @@ class Util:
         return flat_list
 
     @classmethod
+    def detect_encoding(cls, input_path: Path) -> str:
+        if input_path is not None:
+            with open(input_path, "rb") as f:
+                raw = f.read()
+                encoding = chardet.detect(raw)["encoding"]
+            return encoding
+        return None
+
+    @classmethod
+    def get_default_encoding(cls) -> str:
+        enc = locale.getpreferredencoding(False)
+        return enc
+
+    @classmethod
+    def get_common_parents(cls, element1: Tag, element2: Tag) -> List[Tag]:
+        """2つのBeautifulSoup要素の共通する親要素をすべて取得する。
+
+        Args:
+            element1 (Tag): 最初の要素
+            element2 (Tag): 2番目の要素
+
+        Returns:
+            List[Tag]: 共通する親要素のリスト（ルートから近い順、つまり最も近い共通親が最後）
+
+        Examples:
+            >>> from bs4 import BeautifulSoup
+            >>> soup = BeautifulSoup('<div><p><span>text1</span></p><p><span>text2</span></p></div>', 'html.parser')
+            >>> span1 = soup.find_all('span')[0]
+            >>> span2 = soup.find_all('span')[1]
+            >>> common_parents = Util.get_common_parents(span1, span2)
+            >>> # [<div>...</div>, <html>...</html>, <body>...</body>] などが返される
+        """
+
+        def get_all_parents(element: Tag) -> List[Tag]:
+            """要素のすべての親要素をルートまで取得する"""
+            parents = []
+            current = element.parent
+            while current is not None and hasattr(current, "name"):
+                # NavigableStringやNoneを除外し、Tagのみを対象とする
+                if isinstance(current, Tag):
+                    parents.append(current)
+                current = current.parent
+            return parents
+
+        parents1 = get_all_parents(element1)
+        parents2 = get_all_parents(element2)
+
+        # 共通する親要素を見つける（順序を保持）
+        common_parents = []
+        # ルートから近い順に比較するため、逆順にする
+        parents1_reversed = list(reversed(parents1))
+        parents2_reversed = list(reversed(parents2))
+
+        # 両方のリストをセットに変換して高速化
+        parents2_set = set(id(p) for p in parents2_reversed)
+
+        # 共通する親要素を順序を保持して取得
+        for parent in parents1_reversed:
+            if id(parent) in parents2_set:
+                common_parents.append(parent)
+
+        return common_parents
+
+    @classmethod
     def load_yaml(cls, input_path: Path) -> dict:
         """Load a YAML file and return it as a dictionary.
 
@@ -36,14 +288,16 @@ class Util:
         Returns:
             dict: Parsed YAML content.
         """
-        data = None
+        data = {}
         with open(input_path, "r", encoding="utf-8") as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
+        if data is None:
+            data = {}
         return data
 
     @classmethod
-    def output_yaml(cls, assoc: dict, output_path: Optional[Path] = None) -> str:
-        """Serialize a dictionary to YAML and optionally write it to disk.
+    def save_yaml(cls, assoc: dict, output_path: Optional[Path] = None) -> str:
+        """Serialize a dictionary to YAML and optionally save it to disk.
 
         Args:
             assoc (dict): Data to dump.
@@ -53,7 +307,9 @@ class Util:
         Returns:
             str: YAML representation of ``assoc``.
         """
-        yaml_str = yaml.dump(assoc, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        yaml_str = yaml.dump(
+            assoc, default_flow_style=False, allow_unicode=True, sort_keys=False
+        )
 
         if output_path is not None:
             with open(output_path, "w", encoding="utf-8") as f:
@@ -62,7 +318,9 @@ class Util:
         return yaml_str
 
     @classmethod
-    def load_tsv(cls, input_path: Path, fieldnames: Optional[Sequence[str]] = None) -> list[dict]:
+    def load_tsv(
+        cls, input_path: Path, fieldnames: Optional[Sequence[str]] = None
+    ) -> list[dict]:
         """Read a TSV file and convert rows into dictionaries.
 
         Args:
@@ -95,7 +353,10 @@ class Util:
 
     @classmethod
     def output_tsv(
-        cls, records: Sequence[dict], output_path: Optional[Path] = None, fieldnames: Optional[Sequence[str]] = None
+        cls,
+        records: Sequence[dict],
+        output_path: Optional[Path] = None,
+        fieldnames: Optional[Sequence[str]] = None,
     ) -> str:
         """Write record dictionaries to TSV format.
 
@@ -112,7 +373,9 @@ class Util:
             ValueError: If neither records nor ``fieldnames`` are provided.
         """
         if not records and fieldnames is None:
-            raise ValueError("fieldnamesを指定するか、recordsに1件以上のデータを含めてください。")
+            raise ValueError(
+                "fieldnamesを指定するか、recordsに1件以上のデータを含めてください。"
+            )
 
         if fieldnames is None:
             headers = []
@@ -136,7 +399,7 @@ class Util:
 
         return tsv_str
 
-    def test_yaml(self, input_file:str, input_file_2:str, output_file:str):
+    def test_yaml(self, input_file: str, input_file_2: str, output_file: str):
         """Developer helper for merging Udemy YAML progress data.
 
         Returns:
@@ -171,9 +434,9 @@ class Util:
             else:
                 value_2["Time"] = "0時間"
 
-        Util.output_yaml(dict_2, output_path)
+        Util.save_yaml(dict_2, output_path)
 
-    def test_tsv(self, input_file:str, input_file_2:str, output_file:str):
+    def test_tsv(self, input_file: str, input_file_2: str, output_file: str):
         """Developer helper for merging Udemy TSV progress data.
 
         Returns:
@@ -199,6 +462,9 @@ class Util:
 
 
 if __name__ == "__main__":
-    test_util = Util()
-    test_util.test_yaml(input_file="output_udemy_2.yaml", input_file_2="output_udemy_4.yaml", output_file="output_udemy_5.yaml")
-    test_util.test_tsv(input_file="output_udemy_4.tsv", input_file_2="output_udemy_5.tsv", output_file="output_udemy_6.tsv")
+    # test_util = Util()
+    # test_util.test_yaml(input_file="output_udemy_2.yaml", input_file_2="output_udemy_4.yaml", output_file="output_udemy_5.yaml")
+    # test_util.test_tsv(input_file="output_udemy_4.tsv", input_file_2="output_udemy_5.tsv", output_file="output_udemy_6.tsv")
+    str = "https://www.dmm.co.jp/dc/doujin/-/detail/=/cid=d_573976/?dmmref=Basket&i3_ref=recommend&i3_ord=1"
+    ret = Util.extract_cid(str)
+    print(ret)

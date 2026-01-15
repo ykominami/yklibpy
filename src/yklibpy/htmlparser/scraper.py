@@ -2,7 +2,9 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from bs4 import BeautifulSoup
+
 from ..common.info import Info
+from ..common.util import Util
 
 
 class Scraper:
@@ -28,7 +30,6 @@ class Scraper:
           dict: ``links_assoc`` containing course records.
         """
         self.scrape(info)
-        # links_list = self.process_for_udemy(info)
         return self.links_assoc
 
     def _extract_links_from_info(self, info: Info) -> List[Dict[str, str]]:
@@ -54,7 +55,11 @@ class Scraper:
             the file is missing or parsing fails.
         """
         try:
-            with file_path.open("r", encoding="utf-8") as f:
+            encoding = Util.detect_encoding(file_path)
+            if encoding is None:
+                encoding = "utf-8"
+
+            with file_path.open("r", encoding=encoding) as f:
                 # Create a BeautifulSoup object using the lxml parser
                 # soup = BeautifulSoup(f, 'lxml')
                 soup = BeautifulSoup(f, "html5lib")
@@ -86,16 +91,13 @@ class Scraper:
         Returns:
             dict: ``links_assoc`` entries derived from the file.
         """
-        print(f"get_links_assoc_from_html file_path.name={file_path.name}")
         assoc = {}
         if file_path not in self.info.keys():
             soup = self._parse_html_file(file_path)
-            # print(f'soup={soup}')
             if soup:
                 info = Info(file_path, file_path.name, soup, 0, 0)
                 self.info[file_path.name] = info
                 assoc = self._extract_links_assoc_from_info(info)
-        # print(f'soup={soup}')
         return assoc
 
     def get_links_from_html(self, file_path: Path) -> List[Dict[str, str]]:
@@ -107,16 +109,13 @@ class Scraper:
         Returns:
             List[Dict[str, str]]: Extracted course entries.
         """
-        print(f"get_links_from_html file_path.name={file_path.name}")
         links = []
         if file_path not in self.info.keys():
             soup = self._parse_html_file(file_path)
-            # print(f'soup={soup}')
             if soup:
                 info = Info(file_path, file_path.name, soup, 0, 0)
                 self.info[file_path.name] = info
                 links = self._extract_links_from_info(info)
-        # print(f'soup={soup}')
         return links
 
     def _extract_links_from_info(self, info: Info) -> List[Dict[str, str]]:
@@ -146,8 +145,6 @@ class Scraper:
             list: Currently an empty list placeholder for future aggregation.
         """
         for i, item in enumerate(items, 1):
-            print(f"Status Span {i}: {item.get_text(strip=True)}")
-
             # 祖先要素をすべて取得
             ancestors = []
             current = item.parent
@@ -170,6 +167,7 @@ class Scraper:
                 current = current.parent
                 level += 1
 
+            """
             for ancestor in ancestors:
                 indent = "  " * ancestor["level"]
                 print(f"{indent}Level {ancestor['level']}: <{ancestor['tag']}>")
@@ -178,5 +176,6 @@ class Scraper:
                 print(f"{indent}  ID: {ancestor['id']}")
 
             print("-" * 50)
+            """
 
         return []

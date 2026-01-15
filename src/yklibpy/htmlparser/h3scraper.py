@@ -31,7 +31,12 @@ class H3Scraper(UdemyScraper):
             """
 
             # h3タグの子要素であるdiv要素のうち、属性data-purposeの値が"safely-set-inner-html:course-card:visible-instructors"であるものを取得
-            child_div = h3_tag.find("div", {"data-purpose": "safely-set-inner-html:course-card:visible-instructors"})
+            child_div = h3_tag.find(
+                "div",
+                {
+                    "data-purpose": "safely-set-inner-html:course-card:visible-instructors"
+                },
+            )
             if child_div is None:
                 raise ValueError("child_div is None")
 
@@ -48,7 +53,11 @@ class H3Scraper(UdemyScraper):
             course_id = "#"
 
             result = self.add_list_and_assoc(
-                url=url, text=text, course_id=course_id, instructors=instructors, progress=progress
+                url=url,
+                text=text,
+                course_id=course_id,
+                instructors=instructors,
+                progress=progress,
             )
             if result:
                 append_count += 1
