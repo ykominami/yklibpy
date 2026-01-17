@@ -1,13 +1,13 @@
 # from .htmlparser import htmlparser
 # from .common import common
 # from .tomlop import tomlop
-from .db import db_yaml
+# from .db import db_yaml
 
-__all__ = ["db_yaml"]
+# __all__ = ["db_yaml"]
 
 
-def dbyaml():
-    db_yaml()
+#def dbyaml():
+#    db_yaml()
 
 
 def xmain() -> str:
