@@ -1,31 +1,31 @@
-from typing import Dict, List
+from typing import Any, Dict
 
-from ..common.info import Info
-from ..common.util import Util
-from .scraper import Scraper
+from yklibpy.common.info import Info
+from yklibpy.common.util import Util
+from yklibpy.htmlparser.scraper import Scraper
 
 
 class KUScraper(Scraper):
     class WorkInfo:
-        def __init__(self, url: str, title: str):
-            result = Util.isValidUrls([url])
+        def __init__(self, url: str, title: str, sequence: int):
+            self.url: str = ""
+            self.title: str = ""
+            self.sequence: int = 0
+            result = Util.is_valid_urls([url])
             if result:
                 self.url = url
                 self.title = title
-            else:
-                self.url = None
-                self.title = None
+                self.sequence = sequence
 
         def to_assoc(self):
-            return {
-                "url": self.url,
-                "titlet": self.title,
-            }
+            assoc = Scraper._to_assoc(self.title, self.url, self.sequence)
+            return assoc
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, sequence: int):
+        super().__init__(sequence)
+        self.links_assoc: dict[str, dict[str, Any]] = {}
 
-    def scrape(self, info: Info) -> List[Dict[str, str]]:
+    def scrape(self, info: Info) -> Dict[str, Dict[str, Any]]:
         # <div id="itemsList" class="a-section a-spacing-top-large">
         #   <ul id="listContainer" class="a-unordered-list a-nostyle a-vertical" role="list">
 
@@ -36,32 +36,27 @@ class KUScraper(Scraper):
                 if a_tag.get("class") != ["a-link-normal"]:
                     continue
                 url = a_tag.get("href", "#")
+                if isinstance(url, str):
+                    url = url
+                else:
+                    url = ""
+
                 img_tag = a_tag.find("img")
                 if img_tag:
                     title = img_tag.get("alt", "")
+                    if isinstance(title, str):
+                        title = title
+                    else:
+                        title = ""
                 else:
                     title = a_tag.get_text(strip=True)
                 # print(f"text={text}")
-                work_info = self.WorkInfo(url=url, title=title)
-                self.add_list_and_assoc(work_info)
-        return self.links_list
+                work_info = self.WorkInfo(url=url, title=title, sequence=self.sequence)
+                self.add_assoc(work_info)
+        return self.links_assoc
 
-    def add_list_and_assoc(self, work_info: WorkInfo) -> bool:
-        """Insert a new record if the ``course_id`` has not been seen.
-
-        Args:
-            url (str): Course URL.
-            text (str): Anchor text/label.
-
-        Returns:
-            bool: ``True`` when the record was added, else ``False``.
-        """
-        result = False
-        if work_info.url not in self.links_assoc.keys():
-            self.links_assoc[work_info.url] = work_info.to_assoc()
-            self.links_list.append(work_info)
-            result = True
-        else:
-            pass
-
-        return result
+    def add_assoc(self, work_info: WorkInfo) -> bool:
+        Scraper._add_assoc(
+            self.links_assoc, work_info.url, work_info.sequence, work_info.to_assoc()
+        )
+        return True

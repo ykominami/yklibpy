@@ -1,15 +1,15 @@
-from .amazonsavedcartscraper import AmazonSavedCartScraper
-from .app import App
-from .ascraper import AScraper
-from .fanzadoujinpurchasedscraper import FanzaDoujinPurchasedScraper
-from .fanzadoujinscraper import FanzaDoujinScraper
-from .h3scraper import H3Scraper
-from .kuscraper import KUScraper
-from .preparex import Preparex
-from .progress import Progress
-from .scraper import Scraper
-from .udemyscraper import UdemyScraper
+from yklibpy.htmlparser.amazonsavedcartscraper import AmazonSavedCartScraper
+from yklibpy.htmlparser.app import App
+from yklibpy.htmlparser.fanzadoujinpurchasedscraper import FanzaDoujinPurchasedScraper
+from yklibpy.htmlparser.fanzadoujinbasketscraper import FanzaDoujinBasketScraper
+from yklibpy.htmlparser.kuscraper import KUScraper
+from yklibpy.htmlparser.preparex import Preparex
+from yklibpy.htmlparser.progress import Progress
+from yklibpy.htmlparser.scraper import Scraper
+from yklibpy.htmlparser.udemyscraper import UdemyScraper
+from yklibpy.htmlparser.htmlop import HtmlOp
 
+__all__ = ["App", "AmazonSavedCartScraper", "FanzaDoujinPurchasedScraper", "FanzaDoujinBasketScraper", "KUScraper", "Progress", "Scraper", "UdemyScraper", "HtmlOp"]
 
 def xmain() -> str:
     print("Hello from yklibpy!")
@@ -26,7 +26,7 @@ __all__ = [
     "AmazonSavedCartScraper",
     "AScraper",
     "FanzaDoujinPurchasedScraper",
-    "FanzaDoujinScraper",
+    "FanzaDoujinBasketScraper",
     "FanzaDoujindScraper",
     "H3Scraper",
     "KUScraper",

@@ -1,12 +1,13 @@
-from typing import Dict, List
+from typing import Dict
 
-from ..common.info import Info
-from ..common.util import Util
-from .htmlop import HtmlOp
-from .scraper import Scraper
+from yklibpy.common.info import Info
+from yklibpy.common.util import Util
+from yklibpy.htmlparser.htmlop import HtmlOp
+from yklibpy.htmlparser.misc import PriceInfo, Tagx
+from yklibpy.htmlparser.scraper import Scraper
 
 
-class FanzaDoujinScraper(Scraper):
+class FanzaDoujinBasketScraper(Scraper):
     class WorkInfo:
         def __init__(
             self,
@@ -19,6 +20,7 @@ class FanzaDoujinScraper(Scraper):
             creator_text: str,
             price_old: str,
             price_real: str,
+            sequence: int,
         ):
             self.target = target
             self.title = title
@@ -26,38 +28,35 @@ class FanzaDoujinScraper(Scraper):
             self.creator_text = creator_text
             self.price_old = price_old
             self.price_real = price_real
+            self.sequence = sequence
 
-            result_array = Util.isValidUrls([url, maker_url, creator_url])
+            result_array = Util.is_valid_urls([url, maker_url, creator_url])
             if result_array[0].success:
                 self.url = url
             else:
-                self.url = None
+                self.url = ""
 
             if result_array[1].success:
                 self.maker_url = maker_url
             else:
-                self.url = None
+                self.maker_url = ""
 
             if result_array[2].success:
                 self.creator_url = creator_url
             else:
-                self.creator_url = None
+                self.creator_url = ""
 
         def to_assoc(self):
-            return {
-                "target": self.target,
-                "url": self.url,
-                "title": self.title,
-                "maker_url": self.maker_url,
-                "maker_text": self.maker_text,
-                "creator_url": self.creator_url,
-                "creator_text": self.creator_text,
-                "price_old": self.price_old,
-                "price_real": self.price_real,
-            }
+            assoc = Scraper._to_assoc(self.title, self.url, self.sequence)
+            assoc["target"] = self.target
+            assoc["maker_url"] = self.maker_url
+            assoc["creator_url"] = self.creator_url
+            assoc["price_old"] = self.price_old
+            assoc["price_real"] = self.price_real
+            return assoc
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, sequence: int):
+        super().__init__(sequence)
 
     def get_anchor_under_p(self, child, cond=None):
         # div basket-txtContent
@@ -83,9 +82,12 @@ class FanzaDoujinScraper(Scraper):
         creator = None
         for as_p in assoc_p_flat:
             url = as_p.anchor.href
-            result_array = Util.isValidUrls([url])
+            result_array = Util.is_valid_urls([url])
             if result_array[0].success:
-                array = result_array[0].parsed.path.split("/")
+                if result_array[0].parsed is not None:
+                    array = result_array[0].parsed.path.split("/")
+                else:
+                    array = []
                 if "article=maker" in array:
                     maker = as_p
                 elif "article=creator" in array:
@@ -114,14 +116,14 @@ class FanzaDoujinScraper(Scraper):
                 span_text = span_tag.text
         else:
             span_text = span_tag.text
-            price_old = HtmlOp.Tagx(span_tag, "price-old")
+            price_old = Tagx(span_tag, "price-old")
             price_old.set_option(span_text)
 
         strong_tag = p_tag.find("strong")
         strong_text = strong_tag.text
-        price_real = HtmlOp.Tagx(strong_tag, "price-real")
+        price_real = Tagx(strong_tag, "price-real")
         price_real.set_option(strong_text)
-        price_info = HtmlOp.PriceInfo(price_old, price_real)
+        price_info = PriceInfo(price_old, price_real)
         if price_old is None and price_real is None:
             raise ValueError("price_old and price_real are None")
         if price_real is None:
@@ -148,7 +150,7 @@ class FanzaDoujinScraper(Scraper):
 
         return work_name
 
-    def get_and_register_work_info(self, div_tag, target):
+    def get_and_register_work_info(self, div_tag, target) -> bool:
         self.target = target
 
         creator_url = ""
@@ -158,18 +160,20 @@ class FanzaDoujinScraper(Scraper):
 
         price_info = self.get_price_under_p(div_tag)
         if price_info is None:
-            return
+            return False
         price_old = price_info.get_price_old()
         price_real = price_info.get_price_real()
 
         work_name = self.get_work_name(div_tag)
         if work_name is None:
-            return
+            return False
         url = work_name.anchor.href
         title = work_name.anchor.text
-        result = Util.isValidUrls([url])
-        if not result:
-            raise ValueError(f"URL '{url}' is not a valid URI")
+        result = Util.is_valid_urls([url])
+        if not all(r.success for r in result):
+            failed_results = [r for r in result if not r.success]
+            failed_urls = [r.url for r in failed_results]
+            raise ValueError(f"URLs are not valid URIs: {failed_urls}")
 
         assoc = self.get_work_maker_and_creator(div_tag)
         maker = assoc["maker"]
@@ -193,23 +197,19 @@ class FanzaDoujinScraper(Scraper):
             creator_text=creator_text,
             price_old=price_old,
             price_real=price_real,
+            sequence=self.sequence,
         )
-        result = self.add_list_and_assoc(work_info)
-        return result
+        ret = self.add_assoc(work_info)
+        return ret
 
-    def add_list_and_assoc(self, work_info: WorkInfo) -> bool:
-        result = False
-        if work_info.url not in self.links_assoc.keys():
-            cid = Util.extract_cid(work_info.url)
-            self.links_assoc[cid] = work_info.to_assoc()
-            self.links_list.append(work_info)
-            result = True
-        else:
-            pass
+    def add_assoc(self, work_info: WorkInfo) -> bool:
+        cid = Util.extract_cid(work_info.url)
+        Scraper._add_assoc(
+            self.links_assoc, cid, work_info.sequence, work_info.to_assoc()
+        )
+        return True
 
-        return result
-
-    def scrape(self, info: Info) -> List[Dict[str, str]]:
+    def scrape(self, info: Info) -> Dict[str, Dict[str, str]]:
         print("FanzaDoujin scrape")
         soup = info.soup
         append_count = 0
@@ -248,4 +248,4 @@ class FanzaDoujinScraper(Scraper):
         info.no_append_count = no_append_count
         self.append_count += append_count
         self.no_append_count += no_append_count
-        return self.links_list
+        return self.links_assoc

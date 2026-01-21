@@ -1,19 +1,6 @@
-from .tomlop import Tomlop
-
-
-def xmain() -> str:
-    print("Hello from yklibpy!")
-    return "Hello from yklibpy!"
-
-
-def ymain() -> str:
-    print("Y Hello from yklibpy!")
-    return "Y Hello from yklibpy!"
-
+from yklibpy.tomlop.tomlop import Tomlop
+from yklibpy.tomlop.fileitem import FileItem
 
 __all__ = [
-    "Tomlop",
+    "Tomlop","FileItem"
 ]
-
-if __name__ == "__main__":
-    xmain()

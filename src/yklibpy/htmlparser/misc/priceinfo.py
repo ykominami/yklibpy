@@ -1,5 +1,8 @@
+from yklibpy.htmlparser.misc.tagx import Tagx
+
+
 class PriceInfo:
-    def __init__(self, price_old, price_real):
+    def __init__(self, price_old: Tagx | None, price_real: Tagx | None) -> None:
         self.price_old = price_old
         self.price_real = price_real
 

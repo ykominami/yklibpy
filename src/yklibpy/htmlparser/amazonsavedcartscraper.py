@@ -1,42 +1,49 @@
-from typing import Dict, List
+from typing import Dict
 
 from bs4.element import NavigableString
 
-from ..common.info import Info
-from ..common.util import Util
-from .scraper import Scraper
+from yklibpy.common.info import Info
+from yklibpy.common.util import Util
+from yklibpy.htmlparser.scraper import Scraper
 
 
 class AmazonSavedCartScraper(Scraper):
     class WorkInfo:
-        def __init__(self, asin: str, target: str, url: str, title: str):
+        def __init__(
+            self,
+            asin: str,
+            target: str,
+            url: str,
+            title: str,
+            sequence: int,
+        ):
             self.asin = asin
             self.target = target
+            self.url = url
             self.title = title
+            self.sequence = sequence
 
-            result = Util.isValidUrls([url])
+            result = Util.is_valid_urls([url])
             if result:
                 self.url = url
             else:
-                self.url = None
+                self.url = ""
 
         def to_assoc(self):
-            return {
-                "asin": self.asin,
-                "target": self.target,
-                "url": self.url,
-                "title": self.title,
-            }
+            assoc = Scraper._to_assoc(self.title, self.url, self.sequence)
+            assoc["asin"] = self.asin
+            assoc["target"] = self.target
+            return assoc
 
-    def __init__(self):
+    def __init__(self, sequence: int):
         """Initialize Udemy-specific scraper state.
 
         Returns:
           None
         """
-        super().__init__()
+        super().__init__(sequence)
 
-    def scrape(self, info: Info) -> List[Dict[str, str]]:
+    def scrape(self, info: Info) -> Dict[str, Dict[str, str]]:
         """Extract Udemy dashboard cards and convert them into records.
 
         Args:
@@ -70,15 +77,21 @@ class AmazonSavedCartScraper(Scraper):
                     title = "".join(
                         s for s in a_tag.contents if isinstance(s, NavigableString)
                     ).strip()
-                    # course_id = self.get_course_id_from_url(url)
-                    # print(f'asin={asin}')
-                    # print(f'url={url}')
-                    # print(f'text={text}')
-                    # print("====")
+                    if not isinstance(title, str):
+                        title = ""
+                    if not isinstance(asin, str):
+                        asin = ""
+                    if not isinstance(url, str):
+                        url = ""
+
                     work_info = self.WorkInfo(
-                        asin=asin, target="savedcart", url=url, title=title
+                        asin=asin,
+                        target="savedcart",
+                        url=url,
+                        title=title,
+                        sequence=self.sequence,
                     )
-                    result = self.add_list_and_assoc(work_info)
+                    result = self.add_assoc(work_info)
 
                     if result:
                         append_count += 1
@@ -92,20 +105,12 @@ class AmazonSavedCartScraper(Scraper):
         self.append_count += append_count
         self.no_append_count += no_append_count
         print(
-            f"###############   amazonsavedcart scrape len( self.links_list )={len(self.links_list)}"
-        )
-        print(
             f"###############   amazonsavedcart scrape len( self.links_assoc )={len(self.links_assoc)}"
         )
-        return self.links_list
+        return self.links_assoc
 
-    def add_list_and_assoc(self, work_info: WorkInfo) -> bool:
-        result = False
-        if work_info.asin not in self.links_assoc.keys():
-            self.links_assoc[work_info.asin] = work_info
-            self.links_list.append(work_info)
-            result = True
-        else:
-            pass
-
-        return result
+    def add_assoc(self, work_info: WorkInfo) -> bool:
+        Scraper._add_assoc(
+            self.links_assoc, work_info.asin, work_info.sequence, work_info.to_assoc()
+        )
+        return True
