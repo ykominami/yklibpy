@@ -1,5 +1,5 @@
-from bs4.element import Tag
 from typing import Optional
+
 from bs4.element import PageElement
 
 

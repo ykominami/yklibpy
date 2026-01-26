@@ -3,13 +3,13 @@ import json
 # import tomllib  # 3.11以上の場合
 import sys
 from pathlib import Path
+from typing import Any
 
 import toml
 import yaml
 
 from yklibpy.common.util_yaml import UtilYaml
 from yklibpy.tomlop.fileitem import FileItem
-from typing import Any
 
 
 class Tomlop:

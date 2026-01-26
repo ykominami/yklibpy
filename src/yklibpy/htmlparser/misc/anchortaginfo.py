@@ -1,7 +1,9 @@
+from typing import Optional
+
+from bs4.element import PageElement
+
 from yklibpy.htmlparser.misc.anchortagx import AnchorTagx
 from yklibpy.htmlparser.misc.tagx import Tagx
-from typing import Optional
-from bs4.element import PageElement
 
 
 class AnchorTagInfo:

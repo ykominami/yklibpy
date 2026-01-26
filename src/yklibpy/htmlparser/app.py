@@ -2,12 +2,7 @@ from pathlib import Path
 from typing import List
 
 from yklibpy.common.env import Env
-from yklibpy.htmlparser.amazonsavedcartscraper import AmazonSavedCartScraper
-from yklibpy.htmlparser.fanzadoujinbasketscraper import FanzaDoujinBasketScraper
-from yklibpy.htmlparser.fanzadoujinpurchasedscraper import FanzaDoujinPurchasedScraper
-from yklibpy.htmlparser.kuscraper import KUScraper
 from yklibpy.htmlparser.scraper import Scraper
-from yklibpy.htmlparser.udemyscraper import UdemyScraper
 
 
 class App:
@@ -37,23 +32,8 @@ class App:
             Scraper: Concrete scraper that knows how to parse the given site, or
             ``None`` when the mode is unsupported.
         """
-        print(f"mode={mode}")
-        if mode == "udemy":
-            return UdemyScraper(sequence)
-            # return H3Scraper()
-            # return AScraper()
-        elif mode == "ku":
-            return KUScraper(sequence)
-        elif mode == "fanza_doujin_basket":
-            return FanzaDoujinBasketScraper(sequence)
-        elif mode == "fanza_doujin_purchased":
-            return FanzaDoujinPurchasedScraper(sequence)
-        elif mode == "amazon_saved_cart":
-            # print(f'mode={mode}')
-            return AmazonSavedCartScraper(sequence)
-        else:
-            print(f"mode={mode} is not supported")
-            return None
+        print(f"mode={mode} is not supported")
+        return None
 
     def loop(self, files: List[Path], mode: str, sequence: int):
         """Iterate through HTML files and accumulate extracted link metadata.
