@@ -3,8 +3,9 @@ from pathlib import Path
 
 import yaml
 
-from ..common.util import Util
-from .db_base import DbBase
+from yklibpy.common.util import Util
+from yklibpy.common.util_yaml import UtilYaml
+from yklibpy.db.db_base import DbBase
 
 
 class DbYaml(DbBase):
@@ -14,7 +15,7 @@ class DbYaml(DbBase):
         self.fname_path = Path(fname)
         self.data = {}
 
-    def load(self, encoding=None):
+    def load(self, encoding=None, tags=[]):
         Util.ensure_file_path(self.fname_path)
 
         if encoding is None:
@@ -23,6 +24,8 @@ class DbYaml(DbBase):
             encoding = Util.get_default_encoding()
 
         with open(self.fname_path, "r", encoding=encoding) as f:
+            # tag = "tag:yaml.org,2002:python/object:yklibpy.htmlparser.amazonsavedcartscraper.WorkInfo"
+            UtilYaml._register_constructors(tags=tags)
             self.data = yaml.safe_load(f)
             if self.data is None:
                 self.data = {}
@@ -30,7 +33,7 @@ class DbYaml(DbBase):
         return self.data
 
     def save(self):
-        Util.save_yaml(self.data, self.fname_path)
+        UtilYaml.save_yaml(self.data, self.fname_path)
         return True
 
     def get_data(self):
@@ -55,7 +58,8 @@ class DbYaml(DbBase):
         return len(self.data)
 
     def list_text(self, key):
-        return [value[key] for value in list(self.data.values())]
+        listx = [value[key] for value in self.data.values()]
+        return listx
 
 
 if __name__ == "__main__":

@@ -1,13 +1,26 @@
-from .tagx import Tagx
+from typing import Optional
+
+from bs4.element import PageElement
+
+from yklibpy.htmlparser.misc.tagx import Tagx
 
 
 class AnchorTagx(Tagx):
-    def __init__(self, anchor_tag):
+    def __init__(self, anchor_tag: Optional[PageElement]):
         super().__init__(anchor_tag, "anchor")
-        self.href = self.tag.get("href", "")
-        self.text = self.tag.get_text(strip=True)
-        self.mes_href = f"  href: {self.href}"
-        self.mes_text = f"  text: {self.text}"
+        self.href: str = ""
+        self.text: str = ""
+        if self.tag is not None:
+            if hasattr(self.tag, "get"):
+                self.href = self.tag.get("href", "")
+            else:
+                self.href = ""
+            if hasattr(self.tag, "get_text"):
+                self.text = self.tag.get_text(strip=True)
+            else:
+                self.text = ""
+            self.mes_href: str = f"  href: {self.href}"
+            self.mes_text: str = f"  text: {self.text}"
 
-    def show(self):
-        return "\n".join([self.href, self.text])
+    def show(self) -> str:
+        return "\n".join([self.mes_href, self.mes_text])

@@ -1,8 +1,4 @@
-from bs4.element import Tag
-from .misc.tagx import Tagx
-from .misc.anchortagx import AnchorTagx
-from .misc.anchortaginfo import AnchorTagInfo
-from .misc.priceinfo import PriceInfo
+from yklibpy.htmlparser.misc.anchortaginfo import AnchorTagInfo
 
 
 class HtmlOp:
@@ -45,13 +41,11 @@ class HtmlOp:
             for anchor_tag_info in anchor_tag_info_array:
                 cls.print_tag_info(anchor_tag_info)
 
-    """
-	@classmethod
-	def print_tag_info(cls, assoc):
-		tag = assoc["tag"]
-		print(tag)
+    @classmethod
+    def print_tag_info(cls, assoc):
+        tag = assoc["tag"]
+        print(tag)
 
-		mes_array = assoc["mes_array"]
-		mes = "\n".join(mes_array)
-		print(mes)
-	"""
+        mes_array = assoc["mes_array"]
+        mes = "\n".join(mes_array)
+        print(mes)

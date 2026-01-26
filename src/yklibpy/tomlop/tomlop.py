@@ -1,53 +1,15 @@
 import json
-import os
 
 # import tomllib  # 3.11以上の場合
 import sys
 from pathlib import Path
+from typing import Any
 
 import toml
 import yaml
 
-from .util import Util
-
-
-class FileItem:
-    def __init__(self, file):
-        self.file_file = file
-        self.file_path = Path(file)
-        self.file_type = self.get_file_type(file) if file else None
-
-    def get_file_type(self, file_path):
-        """
-        引数で指定されたファイルのパスから拡張子を取り出し、大文字小文字の区別なく、
-        ファイルの種別を文字列で返す。
-
-        Args:
-            file_path: ファイルパス
-
-        Returns:
-            "YAML": .yaml, .yml の場合
-            "JSON": .json の場合
-            "TOML": .toml の場合
-            "TEXT": .txt の場合
-            "OTHER": 上記以外の場合
-            None: file_path が None の場合
-        """
-        if file_path is None:
-            return None
-        _, ext = os.path.splitext(file_path)
-        ext_lower = ext.lower()
-
-        if ext_lower in [".yaml", ".yml"]:
-            return "YAML"
-        elif ext_lower == ".json":
-            return "JSON"
-        elif ext_lower == ".toml":
-            return "TOML"
-        elif ext_lower == ".txt":
-            return "TEXT"
-        else:
-            return "OTHER"
+from yklibpy.common.util_yaml import UtilYaml
+from yklibpy.tomlop.fileitem import FileItem
 
 
 class Tomlop:
@@ -57,7 +19,7 @@ class Tomlop:
     def setup(self, ref_file, config_file):
         self.ref_file_item = FileItem(ref_file)
         self.config_file_item = FileItem(ref_file)
-        self.data = None
+        self.data: dict[str, Any] = {}
 
     def compare_dict(self, dict1, dict2):
         """
@@ -331,25 +293,15 @@ class Tomlop:
             self.setup(src_file, None)
             self.read_toml_external(self.ref_file_item.file_path)
             output_path = Path("a.yaml")
-            Util.save_yaml(self.data, output_path)
+            UtilYaml.save_yaml(self.data, output_path)
 
     def yaml2toml(self):
         input_path = Path(sys.argv[1]) if len(sys.argv) > 1 else None
-        data = Util.load_yaml(input_path)
-        print(f"data={data}")
-        new_file_path = input_path.with_suffix(".toml")
-        print(f"new_file_path={new_file_path}")
-        # self.write_toml_external(new_file_path, data)
-        # print(f"input_path={input_path}")
-        """
-        ref_file = None
-        src_file = sys.argv[1] if len(sys.argv) > 1 else None
-        if src_file is not None:
-            self.setup(src_file, None)
-            new_file_path = self.ref_file_item.file_path.with_suffix(".yaml")
-            self.read_toml_external(self.ref_file_item.file_path)
-            self.store_yaml(new_file_path, self.data)
-        """
+        if input_path is not None:
+            data: dict[str, Any] = UtilYaml.load_yaml(input_path)
+            print(f"data={data}")
+            new_file_path = input_path.with_suffix(".toml")
+            print(f"new_file_path={new_file_path}")
 
 
 def zmain():

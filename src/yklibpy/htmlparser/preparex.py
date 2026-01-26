@@ -1,13 +1,16 @@
 import re
 from pathlib import Path
+from typing import List, Literal
 
-from ..common.util import Util
-from .configprepare import ConfigPrepare
+from yklibpy.common.util import Util
+from yklibpy.htmlparser.configprepare import ConfigPrepare
 
 
 class Preparex:
-    def __init__(self, top_dir, category, config_parent_dir, assoc):
-        config = ConfigPrepare(config_parent_dir, assoc)
+    def __init__(
+        self, top_dir: str, category: str, config_parent_dir: str, assoc: dict
+    ):
+        config = ConfigPrepare(Path(config_parent_dir), assoc)
         self.parts = config.get_utility_category()
         self.top_path = Path(top_dir)
         self.bat1_path = self.top_path / config.get_command_dir()
@@ -32,7 +35,7 @@ class Preparex:
         # pattern = ".yaml"
         print(f"file_extname={file_extname}")
         print(f"self.top_path={self.top_path}")
-        target_type = "file"
+        target_type: Literal["file", "dir", "both"] = "file"
         # target_type = "dir"
         # target_type = "both"
         for path in Util.find_paths(self.top_path, pattern, target_type):
@@ -57,25 +60,8 @@ class Preparex:
                 print(f"right={right}")
 
         print(ul)
-        """
-    print(top_config.get_command())
-    print(top_config.get_category())
-    print(top_config.get_htmlparser())
-    print(top_config.get_utility_category())
-    print(top_config.get_utility_root())
-    """
-        """
-    if parent_path.exists() and parent_path.is_dir():
-        list = parent_path.rglob('*.bat')
-        # list = parent_path.glob('*.bat')
-        # list = parent_path.glob('*.yaml')
-        # list = parent_path.rglob('*.yaml')
-        # list = parent_path.rglob('*.json')
-        for item in list:
-            print(f'item={item.resolve()}')
-    """
 
-    def list_files_containing(self, path, search_string):
+    def list_files_containing(self, path: Path, search_string: str) -> List[Path]:
         """
         指定パス直下に存在するファイルのうち、ファイル名が指定文字列を含むものをすべて列挙する
 
@@ -97,13 +83,14 @@ class Preparex:
 
         return matching_files
 
-    def list_files(self, path, name):
+    def list_files(self, path: Path, name: str) -> List[Path]:
         files = self.list_files_containing(path, name)
         for file in files:
             print(file)
             print(file.name)
+        return files
 
-    def list_htmlparser_files(self, name):
+    def list_htmlparser_files(self, name: str) -> List[Path]:
         files = self.list_files_containing(self.htmlparser_path, name)
         for file in files:
             print(file)
@@ -111,35 +98,15 @@ class Preparex:
             print(file.stem)
             print(file.suffix)
             print(file.parent)
+        return files
 
-    def list_bat1_files(self, name):
+    def list_bat1_files(self, name: str) -> List[Path]:
         files = self.list_files_containing(self.bat1_path, name)
         for file in files:
             print(file)
             print(file.name)
+        return files
 
-    def list_utility_files(self, name, suffix):
+    def list_utility_files(self, name: str, suffix: str) -> List[Path]:
         list = Util.list_files(name, self.parts, suffix)
         return list
-
-
-if __name__ == "__main__":
-    preparex = Preparex()
-    name_left = "htmlparser_"
-    name_right = "Amazon-KU"
-    name = f"{name_left}{name_right}"
-    suffix = ".bat"
-    list = preparex.list_utility_files(name, suffix)
-    for fx in list:
-        print(f"fx={fx}")
-
-    bat1_files = preparex.list_files_containing(preparex.bat1_path, name)
-    for file in bat1_files:
-        print(f"1 file={file}")
-        if file is not None:
-            # print(f'2 {file.name} is found')
-            file_path = Path(file)
-            if str(file_path.name) in list:
-                print(f"file_path.name={file_path.name} found")
-            else:
-                print(f"file_path.name={file_path.name} not found")

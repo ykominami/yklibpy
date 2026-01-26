@@ -1,26 +1,48 @@
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from bs4 import BeautifulSoup
 
-from ..common.info import Info
-from ..common.util import Util
+from yklibpy.common.info import Info
+from yklibpy.common.util import Util
 
 
 class Scraper:
-    def __init__(self):
+    def __init__(self, sequence: int):
         """Initialize in-memory containers for links and bookkeeping.
 
         Returns:
           None
         """
-        self.links_list = []
-        self.links_assoc = {}
-        self.info = {}
+        self.sequence = sequence
+        self.links_assoc: dict[str, dict[str, Any]] = {}
+        self.info: dict[str, Info] = {}
         self.append_count = 0
         self.no_append_count = 0
 
-    def _extract_links_assoc_from_info(self, info: Info) -> List[Dict[str, str]]:
+    @classmethod
+    def _to_assoc(cls, title: str, url: str, sequence: int):
+        return {"title": title, "url": url, "sequence_array": set([sequence])}
+
+    @classmethod
+    def _add_assoc(
+        cls,
+        links_assoc: dict[str, dict[str, Any]],
+        key: str,
+        sequence: int,
+        value_dict: dict[str, Any],
+    ) -> bool:
+        result = False
+        link = links_assoc.get(key, None)
+        if link is None:
+            links_assoc[key] = value_dict
+            result = True
+        else:
+            link["sequence_array"].add(sequence)
+            # raise ValueError(f"link is not None: {link}")
+        return result
+
+    def _extract_links_assoc_from_info(self, info: Info) -> Dict[str, Dict[str, Any]]:
         """Populate the associative map keyed by course ID.
 
         Args:
@@ -31,18 +53,6 @@ class Scraper:
         """
         self.scrape(info)
         return self.links_assoc
-
-    def _extract_links_from_info(self, info: Info) -> List[Dict[str, str]]:
-        """Base stub that child classes override to populate ``links_list``.
-
-        Args:
-          info (Info): Parsed HTML context for the current file.
-
-        Returns:
-          List[Dict[str, str]]: Defaults to an empty list.
-        """
-        self.links_list = []
-        return self.links_list
 
     def _parse_html_file(self, file_path: Path) -> Optional[BeautifulSoup]:
         """Read an HTML file and parse it into BeautifulSoup.
@@ -71,7 +81,7 @@ class Scraper:
             print(f"An error occurred: {e}")
             return None
 
-    def scrape(self, url: str):
+    def scrape(self, info: Info):
         """Primary scraping entry point; implemented by subclasses.
 
         Args:
@@ -82,7 +92,7 @@ class Scraper:
         """
         pass
 
-    def get_links_assoc_from_html(self, file_path: Path) -> List[Dict[str, str]]:
+    def get_links_assoc_from_html(self, file_path: Path) -> Dict[str, Dict[str, Any]]:
         """Parse an HTML file and return the associative course map.
 
         Args:
@@ -92,90 +102,10 @@ class Scraper:
             dict: ``links_assoc`` entries derived from the file.
         """
         assoc = {}
-        if file_path not in self.info.keys():
+        if file_path.name not in self.info.keys():
             soup = self._parse_html_file(file_path)
             if soup:
                 info = Info(file_path, file_path.name, soup, 0, 0)
                 self.info[file_path.name] = info
                 assoc = self._extract_links_assoc_from_info(info)
         return assoc
-
-    def get_links_from_html(self, file_path: Path) -> List[Dict[str, str]]:
-        """Parse an HTML file and return a list of course records.
-
-        Args:
-            file_path (Path): Location of the HTML snapshot.
-
-        Returns:
-            List[Dict[str, str]]: Extracted course entries.
-        """
-        links = []
-        if file_path not in self.info.keys():
-            soup = self._parse_html_file(file_path)
-            if soup:
-                info = Info(file_path, file_path.name, soup, 0, 0)
-                self.info[file_path.name] = info
-                links = self._extract_links_from_info(info)
-        return links
-
-    def _extract_links_from_info(self, info: Info) -> List[Dict[str, str]]:
-        links_list = self.scrape(info)
-        return links_list
-
-    def find_status_span_ancestors(self, soup: BeautifulSoup):
-        """Locate role=\"status\" spans and dump their ancestor structure.
-
-        Args:
-            soup (BeautifulSoup): Parsed HTML document.
-
-        Returns:
-            list: Result from :meth:`find_item_ancestors`.
-        """
-        status_spans = soup.find_all("span", role="status")
-        return self.find_item_ancestors(status_spans)
-
-    def find_item_ancestors(self, items: List[Dict[str, any]]):
-        """Traverse ancestor chains for the supplied elements and log details.
-
-        Args:
-            items (List[Dict[str, any]]): Result set (e.g., BeautifulSoup nodes)
-                whose parent hierarchy should be inspected.
-
-        Returns:
-            list: Currently an empty list placeholder for future aggregation.
-        """
-        for i, item in enumerate(items, 1):
-            # 祖先要素をすべて取得
-            ancestors = []
-            current = item.parent
-            level = 1
-
-            while current and current.name != "html":
-                assoc = {
-                    "level": level,
-                    "tag": current.name,
-                    "text": current.get_text(strip=True)[:100] + "..."
-                    if len(current.get_text(strip=True)) > 100
-                    else current.get_text(strip=True),
-                    "class": current.get("class", []),
-                    "id": current.get("id", ""),
-                }
-                ancestors.append(assoc)
-                if "item" in assoc["class"]:
-                    break
-
-                current = current.parent
-                level += 1
-
-            """
-            for ancestor in ancestors:
-                indent = "  " * ancestor["level"]
-                print(f"{indent}Level {ancestor['level']}: <{ancestor['tag']}>")
-                print(f"{indent}  Text: {ancestor['text']}")
-                print(f"{indent}  Class: {ancestor['class']}")
-                print(f"{indent}  ID: {ancestor['id']}")
-
-            print("-" * 50)
-            """
-
-        return []

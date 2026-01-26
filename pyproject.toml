@@ -1,6 +1,6 @@
 [project]
 name = "yklibpy"
-version = "0.1.11"
+version = "0.1.49"
 description = "Utilty Library by ykominami"
 readme = "README.md"
 authors = [
@@ -13,6 +13,8 @@ dependencies = [
     "html5lib>=1.1",
     "pyyaml>=6.0.3",
     "toml>=0.10.2",
+    "types-pyyaml>=6.0.12.20250915",
+    "types-toml>=0.10.8.20240310",
 ]
 license = "MIT" # ライセンス
 # 分類の情報
@@ -84,3 +86,8 @@ target-version = "py314"
 [tool.mypy]
 python_version = "3.14"
 strict = true
+mypy_path = ["src"]
+
+# [[tool.mypy.overrides]]
+# module = ["untyped_package.*"]
+# follow_untyped_imports = true

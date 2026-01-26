@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 import yaml
 
 
 class Env:
-    def __init__(self, config_path: Path = None):
+    def __init__(self, config_path: Path | None = None):
         """Load configuration and initialize base path/mode settings.
 
         Args:
@@ -15,23 +15,18 @@ class Env:
         Returns:
             None
         """
-        self.base_path = None
-        self.pattern = None
-        self.config = {}
-        self.assoc = {}
-        # print(f"config_path={config_path}")
+        self.sequence = -1
+        self.base_path: Path = Path(".")
+        self.pattern: str | None = None
+        self.config: dict[str, Any] = {}
+        self.assoc: dict[str, Any] = {}
         if config_path is not None:
             with open(config_path, "r", encoding="utf-8") as f:
                 self.assoc = yaml.load(f, Loader=yaml.FullLoader)
-                # print(list(self.assoc.keys()))
-                # list = self.assoc.keys()
-                # for key in list:
-                #     print(f"key={key}")
-
-                base_path_array = self.assoc["base_path"]
+                base_path_array: list[str] = self.assoc["base_path"]
                 self.base_path = self.make_path(base_path_array)
 
-    def make_path(self, path_array: list[str]) -> Path | None:
+    def make_path(self, path_array: list[str]) -> Path:
         """Convert a sequence of path components into a concrete path.
 
         Args:
@@ -41,7 +36,7 @@ class Env:
         Returns:
             Path | None: Composed path or ``None`` when no components exist.
         """
-        base_path = None
+        base_path = Path(".")
         if path_array is not None:
             top_dir = path_array.pop(0)
             top_path = Path(top_dir)
@@ -92,10 +87,15 @@ class Env:
         Returns:
             List[Path]: Concrete file paths ready for scraping.
         """
+        print("env:get_files")
         if len(self.config) == 0:
+            print("0 env:get_files")
+            self.sequence = -1
             return []
         else:
             dir_path = self.base_path / Path(*self.config["dir"])
+            print(f"2 env:get_files dir_path={dir_path}")
+            self.sequence = int(dir_path.stem)
 
             if self.config["kind"] == "file":
                 # 指定されたファイルのみを返す
