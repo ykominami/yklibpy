@@ -16,5 +16,6 @@ class Cli:
         self.args = self.parser.parse_args()
         return self.args
 
-    def get_subparsers(self) -> argparse.ArgumentParser:
+    def get_subparsers(self,  name: str) -> argparse.ArgumentParser:
+        self.subparsers = self.parser.add_subparsers(dest=name, required=True)
         return self.subparsers
