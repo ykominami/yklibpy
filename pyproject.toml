@@ -1,6 +1,6 @@
 [project]
 name = "yklibpy"
-version = "0.1.49"
+version = "0.2.0"
 description = "Utilty Library by ykominami"
 readme = "README.md"
 authors = [
@@ -23,7 +23,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.14",
 	"Programming Language :: Python :: Implementation :: PyPy",
 ]
 
