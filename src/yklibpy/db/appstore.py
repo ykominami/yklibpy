@@ -35,6 +35,18 @@ class AppStore:
                     "file"
                 ].load()
 
+    def show(self, kind: str, base_name: get_store) -> None:
+        dict_x = self.assoc[kind][base_name]["value"]
+        for key in dict_x.keys():
+            print( f'key={key}' )
+            print( dict_x[key])
+
+    def show_config(self, base_name: str) -> None:
+        self.show("config", base_name)
+
+    def show_db(self, base_name: str) -> None:
+        self.show("db", base_name)
+
     def get_assoc_from_config(self, base_name: str) -> Any:
         return self.assoc["config"][base_name]["value"]
 
