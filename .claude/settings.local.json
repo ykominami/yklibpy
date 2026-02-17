@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run mypy:*)",
+      "Bash(python -m mypy:*)",
+      "Bash(py -m mypy src)",
+      "Bash(.venv/Scripts/mypy src)"
+    ]
+  },
+  "outputStyle": "default"
+}
