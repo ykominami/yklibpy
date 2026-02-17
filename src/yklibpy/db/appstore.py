@@ -130,3 +130,15 @@ class AppStore:
 
     def output_db(self, key: str, data: dict[str, Any]) -> None:
         self.assoc["db"][key]["file"].output(data)
+
+    def show(self, kind: str, base_name: str) -> None:
+        dict_x = self.assoc[kind][base_name]["value"]
+        for key in dict_x.keys():
+            print( f'key={key}' )
+            print( dict_x[key])
+
+    def show_config(self, base_name: str) -> None:
+        self.show("config", base_name)
+
+    def show_db(self, base_name: str) -> None:
+        self.show("db", base_name)
