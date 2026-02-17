@@ -8,6 +8,10 @@ class Cli:
         self.parser = argparse.ArgumentParser(
             description=help_text
         )
+        self.args = None
+
+    def get_parser(self) -> argparse.ArgumentParser:
+        return self.parser
 
     def get_args(self) -> argparse.Namespace:
         return self.args
@@ -16,5 +20,7 @@ class Cli:
         self.args = self.parser.parse_args()
         return self.args
 
-    def get_subparsers(self) -> argparse.ArgumentParser:
-        return self.subparsers
+    def get_subparsers(self, name:str) -> argparse.ArgumentParser:
+        subparsers = self.parser.add_subparsers(dest=name, required=True)
+        return subparsers
+
