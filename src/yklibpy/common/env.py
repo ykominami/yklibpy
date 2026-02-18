@@ -87,14 +87,14 @@ class Env:
         Returns:
             List[Path]: Concrete file paths ready for scraping.
         """
-        print("env:get_files")
+        # print("env:get_files")
         if len(self.config) == 0:
-            print("0 env:get_files")
+            # print("0 env:get_files")
             self.sequence = -1
             return []
         else:
             dir_path = self.base_path / Path(*self.config["dir"])
-            print(f"2 env:get_files dir_path={dir_path}")
+            # print(f"2 env:get_files dir_path={dir_path}")
             self.sequence = int(dir_path.stem)
 
             if self.config["kind"] == "file":

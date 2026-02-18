@@ -1,11 +1,11 @@
+import json
 from pathlib import Path
 from typing import Any
+
 import yaml
-import json
 
 from yklibpy.config.appconfig import AppConfig
-from pathlib import Path
-import yaml
+
 
 class Storex:
     _file_type_dict: dict[str, str] = {}
@@ -18,14 +18,20 @@ class Storex:
     def get_ext_name(cls, file_type: str) -> str:
         return cls._file_type_dict[file_type]
 
-    def __init__(self, file_type: str, file_name_array: list[str] | None = None):
-        self.file_name_array = file_name_array or []
+    def __init__(self, file_type: str, file_name_array: list[str]):
+        self.file_name_array = file_name_array
         self.file_type = file_type
 
         # file_name_arrayは完全なパス要素の配列（呼び出し元で構築済み）
-        self.file_path = Path(*self.file_name_array) if self.file_name_array else Path()
+        top_dir = file_name_array.pop(0)
+        top_path = Path(top_dir)
+        for file_name in file_name_array:
+            # print(f'file_name={file_name}')
+            top_path = top_path / Path(file_name)
 
-        self.store: dict[str, str] = {}
+        self.file_path = top_path
+        # self.file_path = Path(**file_name_array)
+        self.store: dict[str, Any] = {}
 
     def get_value(self, key: str) -> Any:
         return self.store.get(key)

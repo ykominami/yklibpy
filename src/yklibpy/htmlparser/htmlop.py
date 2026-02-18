@@ -36,7 +36,7 @@ class HtmlOp:
             list = child.find_all("div")
 
         for div_tag in list:
-            print(f"get_anchor_under_div div_tag: {div_tag}")
+            # print(f"get_anchor_under_div div_tag: {div_tag}")
             anchor_tag_info_array = HtmlOp.get_anchor_all(div_tag)
             for anchor_tag_info in anchor_tag_info_array:
                 cls.print_tag_info(anchor_tag_info)

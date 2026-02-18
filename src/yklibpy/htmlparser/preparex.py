@@ -33,8 +33,8 @@ class Preparex:
         re_file_extname = re.compile(file_extname_x)
         pattern = "*"
         # pattern = ".yaml"
-        print(f"file_extname={file_extname}")
-        print(f"self.top_path={self.top_path}")
+        # print(f"file_extname={file_extname}")
+        # print(f"self.top_path={self.top_path}")
         target_type: Literal["file", "dir", "both"] = "file"
         # target_type = "dir"
         # target_type = "both"
@@ -55,11 +55,11 @@ class Preparex:
                 ul.append(left)
                 right = array[1]
 
-                print(f"stem={stem}")
-                print(f"left={left}")
-                print(f"right={right}")
+                # print(f"stem={stem}")
+                # print(f"left={left}")
+                # print(f"right={right}")
 
-        print(ul)
+        # print(ul)
 
     def list_files_containing(self, path: Path, search_string: str) -> List[Path]:
         """
@@ -86,25 +86,25 @@ class Preparex:
     def list_files(self, path: Path, name: str) -> List[Path]:
         files = self.list_files_containing(path, name)
         for file in files:
-            print(file)
-            print(file.name)
+            # print(file)
+            # print(file.name)
         return files
 
     def list_htmlparser_files(self, name: str) -> List[Path]:
         files = self.list_files_containing(self.htmlparser_path, name)
         for file in files:
-            print(file)
-            print(file.name)
-            print(file.stem)
-            print(file.suffix)
-            print(file.parent)
+            # print(file)
+            # print(file.name)
+            # print(file.stem)
+            # print(file.suffix)
+            # print(file.parent)
         return files
 
     def list_bat1_files(self, name: str) -> List[Path]:
         files = self.list_files_containing(self.bat1_path, name)
         for file in files:
-            print(file)
-            print(file.name)
+            # print(file)
+            # print(file.name)
         return files
 
     def list_utility_files(self, name: str, suffix: str) -> List[Path]:

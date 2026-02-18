@@ -12,22 +12,22 @@ class AppConfig:
             "config": {
                 "file_type": FILE_TYPE_YAML,
                 "ext_name": "",
-                "file": "",
-                "value": "",
+                "file": {},
+                "value": {},
             }
         },
         "db": {
             "db": {
                 "file_type": FILE_TYPE_YAML,
                 "ext_name": "",
-                "file": "",
-                "value": "",
+                "file": {},
+                "value": {},
             },
             "fetch": {
                 "file_type": FILE_TYPE_YAML,
                 "ext_name": "",
-                "file": "",
-                "value": "",
+                "file": {},
+                "value": {},
             },
         },
     }
