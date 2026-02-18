@@ -48,7 +48,7 @@ class UtilYaml:
             dict: Parsed YAML content.
         """
         data = {}
-        print(f"input_path={input_path}")
+        # print(f"input_path={input_path}")
         with open(input_path, "r", encoding="utf-8") as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
         if data is None:

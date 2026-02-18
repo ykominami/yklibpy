@@ -2,8 +2,9 @@ import logging
 import subprocess
 from typing import Any, Optional
 
+
 class Command:
-    def __init__():
+    def __init__(self) -> None:
         pass
 
     def run_command(
@@ -56,6 +57,8 @@ class Command:
         except subprocess.SubprocessError:
             raise
 
+        return ["std_out", "std_error"]
+
     def run_command_simple(self, command: str | list[str], shell: bool = False) -> str:
         """
         コマンドラインを実行して、標準出力への出力を文字列として受け取る（シンプル版）。
@@ -96,6 +99,7 @@ class Command:
                 stderr=e.stderr.decode("utf-8") if e.stderr else "",
             )
             '''
+        return "error"
 
     def array_to_dict(
         self, data: list[dict[str, Any]], key: str

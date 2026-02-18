@@ -32,7 +32,7 @@ def db_yaml(db_file: str) -> DbYaml:
         raise ValueError("Failed to create database")
     db.load()
     db.set_item("name", "John")
-    print(f"db={db.dump()}")
+    # print(f"db={db.get_data()}")
     return db
 
 

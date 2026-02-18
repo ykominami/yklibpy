@@ -112,7 +112,7 @@ class Util:
 
         results: list[Path] = []
 
-        print(f"base_dir={base_dir}")
+        # print(f"base_dir={base_dir}")
         # print(f'pattern={pattern}')
         for path in base_dir.rglob(pattern):
             # print(f'path={path}')
@@ -123,7 +123,7 @@ class Util:
             elif target_type == "both":
                 results.append(path)
 
-        print(f"results={results}")
+        # print(f"results={results}")
         return results
 
     @classmethod
@@ -434,6 +434,45 @@ class Util:
                 record_2["Time"] = "0時間"
         Util.output_tsv(dict_2, output_path)
 
+    @classmethod
+    def remove_crlf(cls, string: str) -> str:
+        # 改行文字のみ抽出
+        #newlines = [c for c in string if c in ("\n", "\r")]
+        newlines = string.replace("\n", "").replace("\r", "")
+        return "".join(newlines)  # ['\n', '\r', '\n', '\n']
+
+    @classmethod
+    def remove_whitespace(cls, string: str) -> str:
+        # 改行文字のみ抽出
+        # whitespace = re.findall(r'\s+', string)
+        whitespace = "".join(string.split())
+        return "".join(whitespace)  # ['\n', '\r', '\n', '\n']
+
+    @classmethod
+    def remove_non_printable(cls, string: str) -> str:
+        non_printable = [c for c in string if c.isprintable()]
+        return "".join(non_printable)  # ['\n', '\t', '\x00']
+
+    @classmethod
+    def get_valie_string(cls, string: str|None) -> str:
+        if string is None:
+            return ""
+        if len(string) == 0:
+            return ""
+        return cls.remove_whitespace(string)
+
+    @classmethod
+    def is_empty(cls, string: str) -> bool:
+        valid_string = cls.get_valie_string(string)
+        return len(valid_string) == 0
+
+    @classmethod
+    def normalize_string(cls, string: str) -> str | None:
+        valid_string = cls.get_valie_string(string)
+        if cls.is_empty(valid_string):
+            return None
+        else:
+            return valid_string
 
 if __name__ == "__main__":
     # test_util = Util()

@@ -32,7 +32,7 @@ class App:
             Scraper: Concrete scraper that knows how to parse the given site, or
             ``None`` when the mode is unsupported.
         """
-        print(f"mode={mode} is not supported")
+        # print(f"mode={mode} is not supported")
         return None
 
     def loop(self, files: List[Path], mode: str, sequence: int):
@@ -45,7 +45,7 @@ class App:
         Returns:
             dict: Mapping of link identifiers to their structured attributes.
         """
-        print(f"S loop files={files}")
+        # print(f"S loop files={files}")
         assoc: dict[str, dict[str, str]] = {}
         for file in files:
             scraper: Scraper | None = self.create_scraper(mode, sequence)
@@ -56,13 +56,15 @@ class App:
                 len_extracted_links_assoc = len(extracted_links_assoc)
                 if len_extracted_links_assoc > 0:
                     len_assoc = len(assoc)
-                    print(f"0 len_assoc={len_assoc}")
+                    # print(f"0 len_assoc={len_assoc}")
                     assoc.update(extracted_links_assoc)
-                    print(f"1 len_assoc={len(assoc)}")
+                    # print(f"1 len_assoc={len(assoc)}")
                 else:
-                    print(f"3 len_extracted_links_assoc={len_extracted_links_assoc}")
+                    # print(f"3 len_extracted_links_assoc={len_extracted_links_assoc}")
+                    pass
             else:
-                print(f"4 extracted_links_assoc={extracted_links_assoc}")
+                # print(f"4 extracted_links_assoc={extracted_links_assoc}")
+                pass
         return assoc
 
     def run(self, env: Env):
@@ -78,7 +80,7 @@ class App:
         sequence = env.sequence
         message = f"path_array={path_array} sequence={sequence}"
         # raise Exception(message)
-        print(message)
+        # print(message)
 
         mode = env.mode()
 

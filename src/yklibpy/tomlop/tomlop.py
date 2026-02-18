@@ -156,17 +156,19 @@ class Tomlop:
     def read_toml_external(self, file_path):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
-                print(f"file_path = {file_path}")
+                # print(f"file_path = {file_path}")
                 try:
                     self.data = toml.load(f)
                 except Exception as e:
                     print(f"エラー: {e}")
                     return None
-                # print(f'data={self.data}')
-                # print(f'self.data["project"]={self.data["project"]}')
+                '''
+                print(f'data={self.data}')
+                print(f'self.data["project"]={self.data["project"]}')
                 print(
                     f'self.data["project"]["authors"]={self.data["project"]["authors"]}'
                 )
+                '''
                 return self.data
         except FileNotFoundError:
             print(f"ファイルが見つかりません: {file_path}")
@@ -194,13 +196,15 @@ class Tomlop:
             return False
 
     def load_toml(self, ref_file):
-        print(f"ref_file={ref_file}")
+        # print(f"ref_file={ref_file}")
         ref = None
         if ref_file:
             ref = self.read_toml_external(ref_file)
+        '''
         if ref is not None:
             print(ref.keys())
-            print("--------------------------------")
+            rint("--------------------------------")
+        '''
         return ref
 
     def load_file(self, file_path):
@@ -221,11 +225,11 @@ class Tomlop:
 
         new_config = self.merge_dict(config, ref)
         result = self.compare_dict(new_config, ref)
-        print(f"# result={result}")
-        print(f"# new_config={new_config}")
+        # print(f"# result={result}")
+        # print(f"# new_config={new_config}")
         diff_result = self.diff_dict(new_config, ref)
-        print("# diff")
-        print(f"diff_result={diff_result}")
+        # print("# diff")
+        # print(f"diff_result={diff_result}")
         self.write_toml_external("new_pyproject.toml", new_config)
 
     def store_yaml(self, file_path, data):
@@ -299,9 +303,9 @@ class Tomlop:
         input_path = Path(sys.argv[1]) if len(sys.argv) > 1 else None
         if input_path is not None:
             data: dict[str, Any] = UtilYaml.load_yaml(input_path)
-            print(f"data={data}")
+            # print(f"data={data}")
             new_file_path = input_path.with_suffix(".toml")
-            print(f"new_file_path={new_file_path}")
+            # print(f"new_file_path={new_file_path}")
 
 
 def zmain():
