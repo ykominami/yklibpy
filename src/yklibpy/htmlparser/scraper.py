@@ -75,10 +75,10 @@ class Scraper:
                 soup = BeautifulSoup(f, "html5lib")
                 return soup
         except FileNotFoundError:
-            print(f"Error: The file at {file_path} was not found.")
+            Loggerx.error(f"Error: The file at {file_path} was not found.", __name__)
             return None
         except Exception as e:
-            print(f"An error occurred: {e}")
+            Loggerx.error(f"An error occurred: {e}", __name__)
             return None
 
     def scrape(self, info: Info):

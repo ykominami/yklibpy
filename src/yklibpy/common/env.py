@@ -3,6 +3,8 @@ from typing import Any, List
 
 import yaml
 
+from yklibpy.common.loggerx import Loggerx
+
 
 class Env:
     def __init__(self, config_path: Path | None = None):
@@ -87,14 +89,14 @@ class Env:
         Returns:
             List[Path]: Concrete file paths ready for scraping.
         """
-        # print("env:get_files")
+        Loggerx.error(f"env:get_files self.config={self.config}", __name__)
         if len(self.config) == 0:
-            # print("0 env:get_files")
+            self.logger.error(f"0 env:get_files")
             self.sequence = -1
             return []
         else:
             dir_path = self.base_path / Path(*self.config["dir"])
-            # print(f"2 env:get_files dir_path={dir_path}")
+            Loggerx.error(f"2 env:get_files dir_path={dir_path}")
             self.sequence = int(dir_path.stem)
 
             if self.config["kind"] == "file":

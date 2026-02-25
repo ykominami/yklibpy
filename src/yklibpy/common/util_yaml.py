@@ -3,6 +3,8 @@ from typing import Any, Optional
 
 import yaml
 
+from yklibpy.common.loggerx import Loggerx
+
 
 class UtilYaml:
     _constructors_registered = False
@@ -19,9 +21,9 @@ class UtilYaml:
 
     @classmethod
     def _register_constructors(cls, tags: list[str]):
-        # print(f"1 _register_constructors: {tags}")
+        Loggerx.debug(f"1 UtilYaml._register_constructors: {tags}", __name__)
         if not cls._constructors_registered:
-            # print(f"2 _register_constructors: {tags}")
+            Loggerx.debug(f"2 UtilYaml._register_constructors: {tags}", __name__)
             tags.append("tag:yaml.org,2002:python/object")
             # カスタムタグのコンストラクタを登録
             for tag in tags:
@@ -30,7 +32,7 @@ class UtilYaml:
                     cls.ignore_python_object_tag,
                     yaml.SafeLoader,
                 )
-                # print(f'tag={tag}')
+                Loggerx.debug(f"3 UtilYaml._register_constructors: tag={tag}", __name__)
         cls._constructors_registered = True
 
     @classmethod
@@ -48,7 +50,7 @@ class UtilYaml:
             dict: Parsed YAML content.
         """
         data = {}
-        # print(f"input_path={input_path}")
+        Loggerx._debug(f"1 UtilYaml.load_yaml: input_path={input_path}", __name__)
         with open(input_path, "r", encoding="utf-8") as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
         if data is None:
