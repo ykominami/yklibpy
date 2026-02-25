@@ -1,65 +1,64 @@
+from typing import Any, ClassVar
+
+
 class AppConfig:
     FILE_TYPE_YAML = "YAML"
     FILE_TYPE_JSON = "JSON"
+    FILE_TYPE_JSON = "JSON"
 
-    file_type_dict = {
+    DIR_TYPE = "DIRECTORY"
+
+    KIND_CONFIG = "config"
+    KIND_DB = "db"
+    KIND_FETCH = "fetch"
+
+    BASE_NAME_CONFIG = "config"
+    BASE_NAME_DB = "db"
+    BASE_NAME_FETCH = "fetch"
+
+    PATH = "path"
+    FILE_TYPE = "file_type"
+    EXT_NAME = "ext_name"
+    VALUE = "value"
+    DATE = "date"
+    
+    file_type_dict: ClassVar[dict[str, str]] = {
         FILE_TYPE_YAML: ".yml",
         FILE_TYPE_JSON: ".json",
     }
 
-    file_assoc = {
-        "config": {
-            "config": {
-                "file_type": FILE_TYPE_YAML,
-                "ext_name": "",
-                "file": {},
-                "value": {},
+    directory_assoc: ClassVar[dict[str, dict[str, dict[str, Any]]]] = {
+        KIND_DB: {
+            BASE_NAME_CONFIG: {
+                PATH: {},
+            }
+        }
+    }
+
+    file_assoc: ClassVar[dict[str, dict[str, dict[str, Any]]]] = {
+        KIND_CONFIG: {
+            BASE_NAME_CONFIG: {
+                FILE_TYPE: FILE_TYPE_YAML,
+                EXT_NAME: "",
+                PATH: {},
+                VALUE: {},
             }
         },
-        "db": {
-            "db": {
-                "file_type": FILE_TYPE_YAML,
-                "ext_name": "",
-                "file": {},
-                "value": {},
+        KIND_DB: {
+            BASE_NAME_DB: {
+                FILE_TYPE: FILE_TYPE_YAML,
+                EXT_NAME: "",
+                PATH: {},
+                VALUE: {},
             },
-            "fetch": {
-                "file_type": FILE_TYPE_YAML,
-                "ext_name": "",
-                "file": {},
-                "value": {},
+            BASE_NAME_FETCH: {
+                FILE_TYPE: FILE_TYPE_YAML,
+                EXT_NAME: "",
+                PATH: {},
+                VALUE: {},
             },
         },
     }
-    default_json_fields_in_db = [
-        "name",
-        "count",
-        "valid",
-        "url",
-        "owner",
-        "nameWithOwner",
-        "parent",
-        "pullRequests",
-        "createdAt",
-        "description",
-        "diskUsage",
-        "hasProjectsEnabled",
-        "homepageUrl",
-    ]
-    default_json_fields = [
-        "name",
-        "url",
-        "owner",
-        "nameWithOwner",
-        "parent",
-        "pullRequests",
-        "createdAt",
-        "description",
-        "diskUsage",
-        "hasProjectsEnabled",
-        "homepageUrl",
-    ]
-    fetch_item = {
-        "date": "",
+    fetch_item: ClassVar[dict[str, str]] = {
+        DATE: "",
     }
-    key = "JSON_FIELDS"

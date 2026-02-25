@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 from typing import List, Literal
 
+from yklibpy.common.loggerx import Loggerx
 from yklibpy.common.util import Util
 from yklibpy.htmlparser.configprepare import ConfigPrepare
 
@@ -33,33 +34,33 @@ class Preparex:
         re_file_extname = re.compile(file_extname_x)
         pattern = "*"
         # pattern = ".yaml"
-        # print(f"file_extname={file_extname}")
-        # print(f"self.top_path={self.top_path}")
+        Loggerx.debug(f"1 Preparex.file_extname={file_extname}", __name__)
+        Loggerx.debug(f"2 Preparex.self.top_path={self.top_path}", __name__)
         target_type: Literal["file", "dir", "both"] = "file"
         # target_type = "dir"
         # target_type = "both"
         for path in Util.find_paths(self.top_path, pattern, target_type):
-            # print(f'path={path}')
+            Loggerx.debug(f'3 Preparex.path={path}', __name__)
             name = str(path.name)
-            # print(f'0 name={name}')
+            Loggerx.debug(f'0 Preparex.name={name}', __name__)
             if not re_file_extname.search(name):
                 continue
-            # print(f'1 name={name}')
+            Loggerx.debug(f'1 Preparex.name={name}', __name__)
             stem = path.stem
 
             array = stem.split("-")
             size = len(array)
-            # print(f'size={size}')
+            Loggerx.debug(f'4 Preparex.size={size}', __name__)
             if size == 2:
                 left = array[0]
                 ul.append(left)
                 right = array[1]
 
-                # print(f"stem={stem}")
-                # print(f"left={left}")
-                # print(f"right={right}")
+                Loggerx.debug(f"5 Preparex.stem={stem}", __name__)
+                Loggerx.debug(f"6 Preparex.left={left}", __name__)
+                Loggerx.debug(f"7 Preparex.right={right}", __name__)
 
-        # print(ul)
+        Loggerx.debug(f"8 Preparex.ul={ul}", __name__)
 
     def list_files_containing(self, path: Path, search_string: str) -> List[Path]:
         """
@@ -86,25 +87,26 @@ class Preparex:
     def list_files(self, path: Path, name: str) -> List[Path]:
         files = self.list_files_containing(path, name)
         for file in files:
-            # print(file)
-            # print(file.name)
+            Loggerx.debug(f'1 Preparex.list_files: file={file}', __name__)
+            Loggerx.debug(f'2 Preparex.list_files: file.name={file.name}', __name__)
         return files
 
     def list_htmlparser_files(self, name: str) -> List[Path]:
         files = self.list_files_containing(self.htmlparser_path, name)
         for file in files:
-            # print(file)
-            # print(file.name)
-            # print(file.stem)
-            # print(file.suffix)
-            # print(file.parent)
+            Loggerx.debug(f'3 Preparex.list_files: file={file}', __name__)
+            Loggerx.debug(f'4 Preparex.list_files: file.name={file.name}', __name__)
+            Loggerx.debug(f'5 Preparex.list_files: file.stem={file.stem}', __name__)
+            Loggerx.debug(f'6 Preparex.list_files: file.suffix={file.suffix}', __name__)
+            Loggerx.debug(f'7 Preparex.list_files: file.parent={file.parent}', __name__)
         return files
 
     def list_bat1_files(self, name: str) -> List[Path]:
         files = self.list_files_containing(self.bat1_path, name)
         for file in files:
-            # print(file)
-            # print(file.name)
+            Loggerx.debug(f'8 Preparex.list_bat1_files: file={file}', __name__)
+            Loggerx.debug(f'9 Preparex.list_bat1_files: file.name={file.name}', __name__)
+
         return files
 
     def list_utility_files(self, name: str, suffix: str) -> List[Path]:

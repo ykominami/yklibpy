@@ -8,6 +8,7 @@ from typing import Any
 import toml
 import yaml
 
+from yklibpy.common.loggerx import Loggerx
 from yklibpy.common.util_yaml import UtilYaml
 from yklibpy.tomlop.fileitem import FileItem
 
@@ -156,19 +157,17 @@ class Tomlop:
     def read_toml_external(self, file_path):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
-                # print(f"file_path = {file_path}")
+                Loggerx.debug(f"1 Tomlop.read_toml_external: file_path = {file_path}", __name__)
                 try:
                     self.data = toml.load(f)
                 except Exception as e:
-                    print(f"エラー: {e}")
+                    Loggerx.debug(f"2 Tomlop.read_toml_external: エラー: {e}", __name__)
                     return None
-                '''
-                print(f'data={self.data}')
-                print(f'self.data["project"]={self.data["project"]}')
-                print(
-                    f'self.data["project"]["authors"]={self.data["project"]["authors"]}'
-                )
-                '''
+
+                Loggerx.debug(f'3 Tomlop.read_toml_external: data={self.data}', __name__)
+                Loggerx.debug(f'4 Tomlop.read_toml_external: self.data["project"]={self.data["project"]}', __name__)
+                Loggerx.debug(f'5 Tomlop.read_toml_external: self.data["project"]["authors"]={self.data["project"]["authors"]}', __name__)
+
                 return self.data
         except FileNotFoundError:
             print(f"ファイルが見つかりません: {file_path}")
@@ -196,15 +195,15 @@ class Tomlop:
             return False
 
     def load_toml(self, ref_file):
-        # print(f"ref_file={ref_file}")
+        Loggerx.debug(f"1 Tomlop.load_toml: ref_file={ref_file}", __name__)
         ref = None
         if ref_file:
             ref = self.read_toml_external(ref_file)
-        '''
+
         if ref is not None:
-            print(ref.keys())
-            rint("--------------------------------")
-        '''
+            Loggerx.debug(f"2 Tomlop.load_toml: ref.keys()={ref.keys()}", __name__)
+            Loggerx.debug("--------------------------------", __name__)
+
         return ref
 
     def load_file(self, file_path):
@@ -225,11 +224,12 @@ class Tomlop:
 
         new_config = self.merge_dict(config, ref)
         result = self.compare_dict(new_config, ref)
-        # print(f"# result={result}")
-        # print(f"# new_config={new_config}")
+        Loggerx.debug(f"1 Tomlop.exec: result={result}", __name__)
+        Loggerx.debug(f"2 Tomlop.exec: new_config={new_config}", __name__)
         diff_result = self.diff_dict(new_config, ref)
-        # print("# diff")
-        # print(f"diff_result={diff_result}")
+        Loggerx.debug(f"3 Tomlop.exec: diff_result={diff_result}", __name__)
+        Loggerx.debug(f"4 Tomlop.exec: diff_result={diff_result}", __name__)
+
         self.write_toml_external("new_pyproject.toml", new_config)
 
     def store_yaml(self, file_path, data):
@@ -303,9 +303,9 @@ class Tomlop:
         input_path = Path(sys.argv[1]) if len(sys.argv) > 1 else None
         if input_path is not None:
             data: dict[str, Any] = UtilYaml.load_yaml(input_path)
-            # print(f"data={data}")
+            Loggerx.debug(f"1 Tomlop.yaml2toml: data={data}", __name__)
             new_file_path = input_path.with_suffix(".toml")
-            # print(f"new_file_path={new_file_path}")
+            Loggerx.debug(f"2 Tomlop.yaml2toml: new_file_path={new_file_path}", __name__)
 
 
 def zmain():
@@ -326,12 +326,3 @@ def yaml2toml():
 if __name__ == "__main__":
     tomlop = Tomlop()
     tomlop.main()
-
-# 使用例
-# new_config は exec() 内で定義されているため、ここでは使用できない
-# tomlop.store_yaml("new_pyproject.yaml", new_config)
-
-# データの取り出し
-# print(f"ツール名: {config['title']}")
-# print(f"対象フォルダ: {config['settings']['target_dir']}")
-# print(f"出力先: {config['settings']['output_file']}")

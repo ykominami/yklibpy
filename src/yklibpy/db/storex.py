@@ -4,6 +4,7 @@ from typing import Any
 
 import yaml
 
+from yklibpy.common.loggerx import Loggerx
 from yklibpy.config.appconfig import AppConfig
 
 
@@ -26,7 +27,7 @@ class Storex:
         top_dir = file_name_array.pop(0)
         top_path = Path(top_dir)
         for file_name in file_name_array:
-            # print(f'file_name={file_name}')
+            Loggerx.debug(f'1 Storex.file_name_array: file_name={file_name}', __name__)
             top_path = top_path / Path(file_name)
 
         self.file_path = top_path

@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 from yklibpy.common.env import Env
+from yklibpy.common.loggerx import Loggerx
 from yklibpy.htmlparser.scraper import Scraper
 
 
@@ -32,7 +33,7 @@ class App:
             Scraper: Concrete scraper that knows how to parse the given site, or
             ``None`` when the mode is unsupported.
         """
-        # print(f"mode={mode} is not supported")
+        Loggerx.debug(f"1 App.create_scraper: mode={mode} is not supported", __name__)
         return None
 
     def loop(self, files: List[Path], mode: str, sequence: int):
@@ -45,7 +46,7 @@ class App:
         Returns:
             dict: Mapping of link identifiers to their structured attributes.
         """
-        # print(f"S loop files={files}")
+        Loggerx.debug(f"1 App.loop: files={files}", __name__)
         assoc: dict[str, dict[str, str]] = {}
         for file in files:
             scraper: Scraper | None = self.create_scraper(mode, sequence)
@@ -56,15 +57,15 @@ class App:
                 len_extracted_links_assoc = len(extracted_links_assoc)
                 if len_extracted_links_assoc > 0:
                     len_assoc = len(assoc)
-                    # print(f"0 len_assoc={len_assoc}")
+                    Loggerx.debug(f"0 App.loop: len_assoc={len_assoc}", __name__)
                     assoc.update(extracted_links_assoc)
-                    # print(f"1 len_assoc={len(assoc)}")
+                    Loggerx.debug(f"1 App.loop: len_assoc={len(assoc)}", __name__)
                 else:
-                    # print(f"3 len_extracted_links_assoc={len_extracted_links_assoc}")
+                    Loggerx.debug(f"3 App.loop: len_extracted_links_assoc={len_extracted_links_assoc}", __name__)
                     pass
             else:
-                # print(f"4 extracted_links_assoc={extracted_links_assoc}")
-                pass
+                Loggerx.debug(f"4 App.loop: extracted_links_assoc={extracted_links_assoc}", __name__)
+
         return assoc
 
     def run(self, env: Env):
@@ -80,7 +81,7 @@ class App:
         sequence = env.sequence
         message = f"path_array={path_array} sequence={sequence}"
         # raise Exception(message)
-        # print(message)
+        Loggerx.debug(f"1 App.run: message={message}", __name__)
 
         mode = env.mode()
 

@@ -10,7 +10,8 @@ from urllib.parse import ParseResult, urlparse
 import chardet
 from bs4 import Tag
 
-from .util_yaml import UtilYaml
+from yklibpy.common.loggerx import Loggerx
+from yklibpy.common.util_yaml import UtilYaml
 
 TargetType = Literal["file", "dir", "both"]
 
@@ -112,10 +113,10 @@ class Util:
 
         results: list[Path] = []
 
-        # print(f"base_dir={base_dir}")
-        # print(f'pattern={pattern}')
+        Loggerx.debug(f"1 Util.find_paths: base_dir={base_dir}", __name__)
+        Loggerx.debug(f"2 pattern={pattern}", __name__)
         for path in base_dir.rglob(pattern):
-            # print(f'path={path}')
+            Loggerx.debug(f'3 Util.find_paths: path={path}', __name__)
             if target_type == "file" and path.is_file():
                 results.append(path)
             elif target_type == "dir" and path.is_dir():
@@ -123,7 +124,7 @@ class Util:
             elif target_type == "both":
                 results.append(path)
 
-        # print(f"results={results}")
+        Loggerx.debug(f"4 Util.find_paths: results={results}", __name__)
         return results
 
     @classmethod
@@ -356,8 +357,8 @@ class Util:
         writer = csv.writer(buffer, delimiter="\t", lineterminator="\n")
         writer.writerow(headers)
         for record in records:
-            # print(record)
-            # print(headers)
+            Loggerx.debug(f"1 Util.output_tsv: record={record}", __name__)
+            Loggerx.debug(f"2 Util.output_tsv: headers={headers}", __name__)
             row = [record.get(header, "") for header in headers]
             writer.writerow(row)
 
@@ -379,7 +380,7 @@ class Util:
         input_path_2 = Path(input_file_2)
         output_path = Path(output_file)
         dict = UtilYaml.load_yaml(input_path)
-        # print(dict)
+        logger.debug(f"1 Util.test_yaml: dict={dict}")
 
         dict_2 = UtilYaml.load_yaml(input_path_2)
         #
@@ -387,7 +388,7 @@ class Util:
         output_tsv_path_2 = output_path.with_suffix(".tsv")
         # keys = dict.keys()
         values = list(dict.values())
-        # print(values)
+        logger.debug(f"3 Util.test_yaml: values={values}")
         keys = values[0].keys()
         Util.output_tsv(values, output_tsv_path, keys)
         # exit()
@@ -467,7 +468,7 @@ class Util:
         return len(valid_string) == 0
 
     @classmethod
-    def normalize_string(cls, string: str) -> str | None:
+    def normalize_string(cls, string: str | None) -> str | None:
         valid_string = cls.get_valie_string(string)
         if cls.is_empty(valid_string):
             return None
@@ -480,4 +481,4 @@ if __name__ == "__main__":
     # test_util.test_tsv(input_file="output_udemy_4.tsv", input_file_2="output_udemy_5.tsv", output_file="output_udemy_6.tsv")
     url_str = "https://www.dmm.co.jp/dc/doujin/-/detail/=/cid=d_573976/?dmmref=Basket&i3_ref=recommend&i3_ord=1"
     ret = Util.extract_cid(url_str)
-    print(ret)
+    Loggerx.debug(f"1 Util.main: ret={ret}", __name__)

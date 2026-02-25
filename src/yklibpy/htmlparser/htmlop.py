@@ -1,3 +1,4 @@
+from yklibpy.common.loggerx import Loggerx
 from yklibpy.htmlparser.misc.anchortaginfo import AnchorTagInfo
 
 
@@ -23,7 +24,7 @@ class HtmlOp:
         if anchor_tag is None:
             return None
 
-        # print('----')
+        Loggerx.debug('----', __name__)
         a_tag_info = AnchorTagInfo(anchor_tag)
 
         return a_tag_info
@@ -36,7 +37,7 @@ class HtmlOp:
             list = child.find_all("div")
 
         for div_tag in list:
-            # print(f"get_anchor_under_div div_tag: {div_tag}")
+            Loggerx.debug(f"1 HtmlOp.get_anchor_under_div: div_tag={div_tag}", __name__)
             anchor_tag_info_array = HtmlOp.get_anchor_all(div_tag)
             for anchor_tag_info in anchor_tag_info_array:
                 cls.print_tag_info(anchor_tag_info)
@@ -44,8 +45,8 @@ class HtmlOp:
     @classmethod
     def print_tag_info(cls, assoc):
         tag = assoc["tag"]
-        print(tag)
+        Loggerx.debug(f"1 HtmlOp.print_tag_info: tag={tag}", __name__)
 
         mes_array = assoc["mes_array"]
         mes = "\n".join(mes_array)
-        print(mes)
+        Loggerx.debug(f"1 HtmlOp.print_tag_info: mes={mes}", __name__)

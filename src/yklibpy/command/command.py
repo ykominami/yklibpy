@@ -2,6 +2,11 @@ import logging
 import subprocess
 from typing import Any, Optional
 
+from yklibpy.common.loggerx import Loggerx
+from yklibpy.common.timex import Timex
+from yklibpy.config.appconfig import AppConfig
+from yklibpy.db.appstore import AppStore
+
 
 class Command:
     def __init__(self) -> None:
@@ -51,13 +56,11 @@ class Command:
             raise subprocess.TimeoutExpired(
                 cmd=command,
                 timeout=timeout_float,
-                output=e.stdout.decode(encoding) if e.stdout else "",
-                stderr=e.stderr.decode(encoding) if e.stderr else "",
+                output=e.stdout or "",
+                stderr=e.stderr or "",
             )
         except subprocess.SubprocessError:
             raise
-
-        return ["std_out", "std_error"]
 
     def run_command_simple(self, command: str | list[str], shell: bool = False) -> str:
         """
@@ -100,6 +103,51 @@ class Command:
             )
             '''
         return "error"
+
+    def get_next_count(self, appstore: AppStore) -> int:
+        fetch_assoc = appstore.get_file_assoc_from_db(AppConfig.BASE_NAME_FETCH)
+        count, fetch_assoc = self._next_count(fetch_assoc)
+        appstore.output_db(AppConfig.BASE_NAME_FETCH, fetch_assoc)
+        return count
+
+    def run_command_simple_with_count(
+        self,
+        appstore: AppStore,
+        command: str | list[str],
+        shell: bool = False,
+        *,
+        force: bool = False,
+        verbose: bool = False,
+    ) -> str:
+        count = self.get_next_count(appstore)
+        if count == 1 or force:
+            message = self.run_command_simple(command, shell=shell)
+        else:
+            message = ""
+
+        if verbose:
+            appstore.show(AppConfig.KIND_DB, AppConfig.BASE_NAME_FETCH)
+
+        return message
+
+    def _next_count(
+        self, fetch_assoc: dict[str, str] | None
+    ) -> tuple[int, dict[str, str]]:
+        if not fetch_assoc:
+            next_count = 1
+            fetch_assoc = {"1": ""}
+            return next_count, fetch_assoc
+
+        max_key = 0
+        for key in fetch_assoc:
+            try:
+                max_key = max(max_key, int(key))
+            except ValueError:
+                continue
+
+        next_count = max_key + 1
+        fetch_assoc[str(next_count)] = Timex.get_now()
+        return next_count, fetch_assoc
 
     def array_to_dict(
         self, data: list[dict[str, Any]], key: str

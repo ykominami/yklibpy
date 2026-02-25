@@ -1,6 +1,6 @@
 [project]
 name = "yklibpy"
-version = "0.2.5"
+version = "0.2.9"
 description = "Utilty Library by ykominami"
 readme = "README.md"
 authors = [
