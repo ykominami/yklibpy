@@ -87,6 +87,9 @@ target-version = "py314"
 python_version = "3.14"
 strict = true
 mypy_path = ["src"]
+namespace_packages = true
+explicit_package_bases = true
+check_untyped_defs = true
 
 # [[tool.mypy.overrides]]
 # module = ["untyped_package.*"]

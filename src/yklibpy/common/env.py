@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, List
+from typing import Any, cast
 
 import yaml
 
@@ -7,7 +7,7 @@ from yklibpy.common.loggerx import Loggerx
 
 
 class Env:
-    def __init__(self, config_path: Path | None = None):
+    def __init__(self, config_path: Path | None = None) -> None:
         """Load configuration and initialize base path/mode settings.
 
         Args:
@@ -25,7 +25,7 @@ class Env:
         if config_path is not None:
             with open(config_path, "r", encoding="utf-8") as f:
                 self.assoc = yaml.load(f, Loader=yaml.FullLoader)
-                base_path_array: list[str] = self.assoc["base_path"]
+                base_path_array = cast(list[str], self.assoc["base_path"])
                 self.base_path = self.make_path(base_path_array)
 
     def make_path(self, path_array: list[str]) -> Path:
@@ -39,25 +39,24 @@ class Env:
             Path | None: Composed path or ``None`` when no components exist.
         """
         base_path = Path(".")
-        if path_array is not None:
-            top_dir = path_array.pop(0)
-            top_path = Path(top_dir)
-            base_path = top_path / Path(*path_array)
+        top_dir = path_array.pop(0)
+        top_path = Path(top_dir)
+        base_path = top_path / Path(*path_array)
 
         return base_path
 
-    def mode(self):
+    def mode(self) -> str:
         """Return the scraper mode stored in the active pattern.
 
         Returns:
             str: Mode string, defaulting to ``"H3"`` when unspecified.
         """
-        mode = self.config["mode"]
+        mode = cast(str | None, self.config.get("mode"))
         if mode is None:
-            mode = "H3"
+            return "H3"
         return mode
 
-    def set_base_path(self, base_path: Path):
+    def set_base_path(self, base_path: Path) -> None:
         """Persist an externally provided root directory.
 
         Args:
@@ -68,7 +67,7 @@ class Env:
         """
         self.base_path = base_path
 
-    def set_pattern(self, pattern: str):
+    def set_pattern(self, pattern: str) -> dict[str, Any] | None:
         """Load the configuration block associated with ``pattern``.
 
         Args:
@@ -83,7 +82,7 @@ class Env:
         self.config = self.assoc[pattern]
         return self.config
 
-    def get_files(self) -> List[Path]:
+    def get_files(self) -> list[Path]:
         """Resolve the files or directory contents defined by the pattern.
 
         Returns:
@@ -91,18 +90,19 @@ class Env:
         """
         Loggerx.error(f"env:get_files self.config={self.config}", __name__)
         if len(self.config) == 0:
-            self.logger.error(f"0 env:get_files")
+            Loggerx.error("0 env:get_files", __name__)
             self.sequence = -1
             return []
         else:
-            dir_path = self.base_path / Path(*self.config["dir"])
-            Loggerx.error(f"2 env:get_files dir_path={dir_path}")
+            dir_parts = cast(list[str], self.config["dir"])
+            dir_path = self.base_path / Path(*dir_parts)
+            Loggerx.error(f"2 env:get_files dir_path={dir_path}", __name__)
             self.sequence = int(dir_path.stem)
 
             if self.config["kind"] == "file":
                 # 指定されたファイルのみを返す
-                files = self.config.get("files", [])
-                return [dir_path / file for file in files]
+                files_raw = cast(list[Any], self.config.get("files", []))
+                return [dir_path / str(file) for file in files_raw]
             else:
                 # 指定ディレクトリの直下に存在するファイルの一覧を返す
                 if not dir_path.exists() or not dir_path.is_dir():

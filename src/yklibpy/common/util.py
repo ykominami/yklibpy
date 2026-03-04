@@ -4,7 +4,17 @@ import locale
 import re
 from io import StringIO
 from pathlib import Path
-from typing import List, Literal, Optional, Sequence
+from typing import (
+    Any,
+    Generic,
+    Iterable,
+    Iterator,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    TypeVar,
+)
 from urllib.parse import ParseResult, urlparse
 
 import chardet
@@ -14,6 +24,7 @@ from yklibpy.common.loggerx import Loggerx
 from yklibpy.common.util_yaml import UtilYaml
 
 TargetType = Literal["file", "dir", "both"]
+T = TypeVar("T")
 
 """
 from __future__ import annotations
@@ -48,26 +59,26 @@ _export_classes_from_submodules()
 
 
 class Util:
-    class UniqueList:
-        def __init__(self):
-            self._set = set()
-            self._list = []
+    class UniqueList(Generic[T]):
+        def __init__(self) -> None:
+            self._set: set[T] = set()
+            self._list: list[T] = []
 
-        def append(self, value):
+        def append(self, value: T) -> None:
             if value not in self._set:
                 self._set.add(value)
                 self._list.append(value)
 
-        def __iter__(self):
+        def __iter__(self) -> Iterator[T]:
             return iter(self._list)
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return repr(self._list)
 
     class Result:
         def __init__(
             self, success: bool, url: str, reason: str, parsed: ParseResult | None
-        ):
+        ) -> None:
             self.success = success
             self.url = url
             self.reason = reason
@@ -88,10 +99,6 @@ class Util:
             function = caller.f_code.co_name
             return f"{filename}:{lineno} in {function}"
         return "unknown"
-
-    @classmethod
-    def xyz(cls):
-        print("xyz")
 
     @classmethod
     def find_paths(
@@ -128,13 +135,16 @@ class Util:
         return results
 
     @classmethod
-    def list_files(cls, name, parts, suffix):
-        list = [f"{name}-{part}{suffix}" for part in parts]
-        return list
+    def xyz(cls) -> None:
+        print("xyz")
+
+    @classmethod
+    def list_files(cls, name: str, parts: Sequence[str], suffix: str) -> list[str]:
+        return [f"{name}-{part}{suffix}" for part in parts]
 
     @classmethod
     def is_valid_urls(cls, urls: List[str]) -> List["Util.Result"]:
-        result_array = []
+        result_array: list[Util.Result] = []
         for url in urls:
             if url == "" or url is None:
                 result = cls.Result(False, url, "URL is empty", None)
@@ -180,7 +190,7 @@ class Util:
         return m.group(1) if m else None
 
     @classmethod
-    def flatten_gen(cls, lst):
+    def flatten_gen(cls, lst: list[Any]) -> Iterator[Any]:
         for item in lst:
             if isinstance(item, list):
                 yield from Util.flatten_gen(item)
@@ -194,6 +204,7 @@ class Util:
         if not path.exists():
             parent_path = path.parent
             if not parent_path.exists():
+                Loggerx.debug(f'11 Util.ensure_file_path: parent_path={parent_path}', __name__)
                 parent_path.mkdir(parents=True, exist_ok=True)
         path.touch()
         return path
@@ -202,11 +213,12 @@ class Util:
     def ensure_dir_path(cls, path: Path | None) -> Path | None:
         if path is None:
             return None
+        Loggerx.debug(f'12 Util.ensure_dir_path: path={path}', __name__)
         path.mkdir(parents=True, exist_ok=True)
         return path
 
     @classmethod
-    def flatten(cls, items):
+    def flatten(cls, items: Iterable[Any]) -> list[Any]:
         """Flatten arbitrarily nested iterables into a single list.
 
         Args:
@@ -291,7 +303,7 @@ class Util:
     @classmethod
     def load_tsv(
         cls, input_path: Path, fieldnames: Optional[Sequence[str]] = None
-    ) -> list[dict]:
+    ) -> list[dict[str, str]]:
         """Read a TSV file and convert rows into dictionaries.
 
         Args:
@@ -305,7 +317,7 @@ class Util:
         Raises:
             ValueError: If no headers can be determined.
         """
-        records = []
+        records: list[dict[str, str]] = []
         with open(input_path, "r", encoding="utf-8", newline="") as f:
             reader = csv.reader(f, delimiter="\t")
             headers = list(fieldnames) if fieldnames is not None else None
@@ -325,7 +337,7 @@ class Util:
     @classmethod
     def output_tsv(
         cls,
-        records: Sequence[dict],
+        records: Sequence[dict[str, str]],
         output_path: Optional[Path] = None,
         fieldnames: Optional[Sequence[str]] = None,
     ) -> str:
@@ -370,7 +382,7 @@ class Util:
 
         return tsv_str
 
-    def test_yaml(self, input_file: str, input_file_2: str, output_file: str):
+    def test_yaml(self, input_file: str, input_file_2: str, output_file: str) -> None:
         """Developer helper for merging Udemy YAML progress data.
 
         Returns:
@@ -380,7 +392,7 @@ class Util:
         input_path_2 = Path(input_file_2)
         output_path = Path(output_file)
         dict = UtilYaml.load_yaml(input_path)
-        logger.debug(f"1 Util.test_yaml: dict={dict}")
+        Loggerx.debug(f"1 Util.test_yaml: dict={dict}", __name__)
 
         dict_2 = UtilYaml.load_yaml(input_path_2)
         #
@@ -388,7 +400,7 @@ class Util:
         output_tsv_path_2 = output_path.with_suffix(".tsv")
         # keys = dict.keys()
         values = list(dict.values())
-        logger.debug(f"3 Util.test_yaml: values={values}")
+        Loggerx.debug(f"3 Util.test_yaml: values={values}", __name__)
         keys = values[0].keys()
         Util.output_tsv(values, output_tsv_path, keys)
         # exit()
@@ -407,7 +419,7 @@ class Util:
 
         UtilYaml.save_yaml(dict_2, output_path)
 
-    def test_tsv(self, input_file: str, input_file_2: str, output_file: str):
+    def test_tsv(self, input_file: str, input_file_2: str, output_file: str) -> None:
         """Developer helper for merging Udemy TSV progress data.
 
         Returns:
@@ -474,6 +486,56 @@ class Util:
             return None
         else:
             return valid_string
+
+    @classmethod
+    def array_to_dict(
+        cls, data: list[dict[str, Any]], key: str
+    ) -> dict[str, dict[str, Any]]:
+        """
+        JSON形式文字列の配列から、指定文字列をキーとする連想配列に変換する。
+
+        Args:
+            data: 辞書のリスト（JSON配列をパースしたもの）
+            key: 連想配列のキーとして使用するフィールド名
+
+        Returns:
+            指定したキーをキーとし、元の要素を値とする連想配列（辞書）
+
+        Raises:
+            KeyError: 指定したキーが要素に存在しない場合
+            TypeError: 要素が辞書でない場合
+
+        Example:
+            >>> ghprj = Ghprj()
+            >>> data = [
+            ...     {"name": "repo1", "url": "https://example.com/repo1"},
+            ...     {"name": "repo2", "url": "https://example.com/repo2"}
+            ... ]
+            >>> result = ghprj.array_to_dict(data, "name")
+            >>> print(result["repo1"])  # {"name": "repo1", "url": "https://example.com/repo1"}
+        """
+        result: dict[str, dict[str, Any]] = {}
+        for item in data:
+            if not isinstance(item, dict):
+                raise TypeError(
+                    f"配列の要素は辞書である必要があります。現在の型: {type(item).__name__}"
+                )
+            if key not in item:
+                raise KeyError(
+                    f"キー '{key}' が要素に存在しません。要素のキー: {list(item.keys())}"
+                )
+            key_value = item[key]
+            if not isinstance(key_value, (str, int, float, bool)) or key_value is None:
+                raise ValueError(
+                    f"キー '{key}' の値は文字列、数値、真偽値である必要があります。現在の型: {type(key_value).__name__}"
+                )
+            result[str(key_value)] = item
+
+        return result
+
+    @classmethod
+    def swap_dict(cls, dict: dict[str, str]) -> dict[str, str]:
+        return {v: k for k, v in dict.items()} if dict else {}
 
 if __name__ == "__main__":
     # test_util = Util()

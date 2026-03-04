@@ -2,8 +2,6 @@ from typing import Optional
 
 from bs4.element import PageElement
 
-from yklibpy.common.loggerx import Loggerx
-
 
 class Tagx:
     def __init__(self, tag: Optional[PageElement], namex: str):

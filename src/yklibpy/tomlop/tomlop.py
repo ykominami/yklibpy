@@ -1,28 +1,31 @@
-import json
 
 # import tomllib  # 3.11以上の場合
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import toml
-import yaml
 
 from yklibpy.common.loggerx import Loggerx
 from yklibpy.common.util_yaml import UtilYaml
+from yklibpy.config.appconfig import AppConfig
 from yklibpy.tomlop.fileitem import FileItem
 
 
 class Tomlop:
-    def __init__(self):
-        pass
+    _count: int = 0
 
-    def setup(self, ref_file, config_file):
+    def __init__(self) -> None:
+        if Tomlop._count == 0:
+            FileItem.setup()
+            Tomlop._count += 1
+        self.data: Any = {}
+
+    def setup(self, ref_file: str | Path | list[str] | list[Path], config_file: str | Path | list[str] | list[Path] | None) -> None:
         self.ref_file_item = FileItem(ref_file)
-        self.config_file_item = FileItem(ref_file)
-        self.data: dict[str, Any] = {}
+        self.config_file_item = FileItem(config_file) if config_file is not None else None
 
-    def compare_dict(self, dict1, dict2):
+    def compare_dict(self, dict1: dict[str, Any], dict2: dict[str, Any]) -> bool:
         """
         引数1と引数2のキーとキーに対応する値が完全に一致しているかを判定する。
         値が連想配列の場合は再帰的に処理する。
@@ -54,7 +57,7 @@ class Tomlop:
 
         return True
 
-    def merge_dict(self, dict1, dict2):
+    def merge_dict(self, dict1: dict[str, Any], dict2: dict[str, Any]) -> dict[str, Any]:
         """
         引数2の連想配列のキーが引数1に存在しない場合、そのキーと値を引数1に追加する。
         値が連想配列の場合は再帰的に処理する。
@@ -75,7 +78,7 @@ class Tomlop:
                 self.merge_dict(dict1[key], value)
         return dict1
 
-    def diff_dict(self, dict1, dict2):
+    def diff_dict(self, dict1: dict[str, Any], dict2: dict[str, Any]) -> str:
         """
         比較元と比較先の入れ子の連想配列の差分を文字列として返す。
         値が連想配列の場合は再帰的に処理する。
@@ -137,7 +140,7 @@ class Tomlop:
 
         return "\n".join(result_lines) if result_lines else ""
 
-    def _format_value(self, value):
+    def _format_value(self, value: Any) -> str:
         """
         値を文字列としてフォーマットする。
         辞書の場合は見やすい形式で表示する。
@@ -154,26 +157,27 @@ class Tomlop:
         else:
             return str(value)
 
-    def read_toml_external(self, file_path):
+    def read_toml_external(self, file_path: str | Path) -> dict[str, Any] | None:
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 Loggerx.debug(f"1 Tomlop.read_toml_external: file_path = {file_path}", __name__)
                 try:
-                    self.data = toml.load(f)
+                    data = toml.load(f)
+                    self.data = data
                 except Exception as e:
                     Loggerx.debug(f"2 Tomlop.read_toml_external: エラー: {e}", __name__)
                     return None
 
-                Loggerx.debug(f'3 Tomlop.read_toml_external: data={self.data}', __name__)
-                Loggerx.debug(f'4 Tomlop.read_toml_external: self.data["project"]={self.data["project"]}', __name__)
-                Loggerx.debug(f'5 Tomlop.read_toml_external: self.data["project"]["authors"]={self.data["project"]["authors"]}', __name__)
+                Loggerx.debug(f"3 Tomlop.read_toml_external: data={data}", __name__)
+                Loggerx.debug(f'4 Tomlop.read_toml_external: data["project"]={data["project"]}', __name__)
+                Loggerx.debug(f'5 Tomlop.read_toml_external: data["project"]["authors"]={data["project"]["authors"]}', __name__)
 
-                return self.data
+                return data
         except FileNotFoundError:
             print(f"ファイルが見つかりません: {file_path}")
             return None
 
-    def write_toml_external(self, file_path, data):
+    def write_toml_external(self, file_path: str | Path, data: Any) -> bool:
         """
         tomlを用いて、引数で渡された連想配列を、引数で指定されたパスに、TOML形式ファイル出力する。
 
@@ -194,7 +198,7 @@ class Tomlop:
             print(f"エラー: {e}")
             return False
 
-    def load_toml(self, ref_file):
+    def load_toml(self, ref_file: str | Path | None) -> dict[str, Any] | None:
         Loggerx.debug(f"1 Tomlop.load_toml: ref_file={ref_file}", __name__)
         ref = None
         if ref_file:
@@ -206,21 +210,12 @@ class Tomlop:
 
         return ref
 
-    def load_file(self, file_path):
-        file_item = FileItem(file_path)
-        file_type = file_item.get_file_type(file_path)
-        if file_type == "TOML":
-            return self.load_toml(file_path)
-        elif file_type == "YAML":
-            return self.load_yaml(file_path)
-        elif file_type == "JSON":
-            return self.load_json(file_path)
-        else:
-            return None
-
-    def exec(self):
-        ref = self.load_file(self.ref_file_item.file_path)
-        config = self.load_file(self.config_file_item.file_path)
+    def exec(self) -> None:
+        ref = cast(dict[str, Any], self.ref_file_item.storex.load())
+        if self.config_file_item is None:
+            raise ValueError("config_file_item is not set")
+        config = cast(dict[str, Any], self.config_file_item.storex.load())
+        self.data = config
 
         new_config = self.merge_dict(config, ref)
         result = self.compare_dict(new_config, ref)
@@ -230,68 +225,24 @@ class Tomlop:
         Loggerx.debug(f"3 Tomlop.exec: diff_result={diff_result}", __name__)
         Loggerx.debug(f"4 Tomlop.exec: diff_result={diff_result}", __name__)
 
-        self.write_toml_external("new_pyproject.toml", new_config)
+        new_yaml_file = FileItem(["new_pyproject.toml"], new_config)
+        diff_yaml_file = FileItem(["diff_pyproject.toml"], diff_result)
+        new_yaml_file.output()
+        diff_yaml_file.output()
 
-    def store_yaml(self, file_path, data):
-        with open(file_path, "w", encoding="utf-8") as f:
-            yaml.dump(data, f)
-
-    def load_yaml(self, file_path):
-        """
-        YAMLファイルを読み込んで辞書として返す。
-
-        Args:
-            file_path: YAMLファイルへのパス
-
-        Returns:
-            読み込んだデータ（辞書）、失敗時はNone
-        """
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
-            return data
-        except FileNotFoundError:
-            print(f"ファイルが見つかりません: {file_path}")
-            return None
-        except Exception as e:
-            print(f"YAMLファイルの読み込みに失敗しました: {file_path}")
-            print(f"エラー: {e}")
-            return None
-
-    def load_json(self, file_path):
-        """
-        JSONファイルを読み込んで辞書として返す。
-
-        Args:
-            file_path: JSONファイルへのパス
-
-        Returns:
-            読み込んだデータ（辞書）、失敗時はNone
-        """
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            return data
-        except FileNotFoundError:
-            print(f"ファイルが見つかりません: {file_path}")
-            return None
-        except Exception as e:
-            print(f"JSONファイルの読み込みに失敗しました: {file_path}")
-            print(f"エラー: {e}")
-            return None
-
-    # @classmethod
-    def main(self):
+    def main(self) -> None:
         ref_file = None
         ref_file = sys.argv[1] if len(sys.argv) > 1 else None
         config_file = sys.argv[2] if len(sys.argv) > 2 else "pyproject.toml"
         if ref_file is not None:
             self.setup(ref_file, config_file)
-            self.exec()
-            new_file_path = self.ref_file_item.file_path.with_suffix(".yaml")
-            self.store_yaml(new_file_path, self.data)
+            # self.exec()
+            ext_name = self.ref_file_item.storex.get_ext_name(AppConfig.FILE_TYPE_YAML)
+            # name = self.ref_file_item.storex.get_name()
+            new_file_path = self.ref_file_item.with_suffix(ext_name)
+            FileItem(new_file_path, self.data).output()
 
-    def toml2yaml(self):
+    def toml2yaml(self) -> None:
         src_file = sys.argv[1] if len(sys.argv) > 1 else None
         if src_file is not None:
             self.setup(src_file, None)
@@ -299,7 +250,7 @@ class Tomlop:
             output_path = Path("a.yaml")
             UtilYaml.save_yaml(self.data, output_path)
 
-    def yaml2toml(self):
+    def yaml2toml(self) -> None:
         input_path = Path(sys.argv[1]) if len(sys.argv) > 1 else None
         if input_path is not None:
             data: dict[str, Any] = UtilYaml.load_yaml(input_path)
@@ -308,17 +259,17 @@ class Tomlop:
             Loggerx.debug(f"2 Tomlop.yaml2toml: new_file_path={new_file_path}", __name__)
 
 
-def zmain():
+def zmain() -> None:
     tomlop = Tomlop()
     tomlop.main()
 
 
-def toml2yaml():
+def toml2yaml() -> None:
     tomlop = Tomlop()
     tomlop.toml2yaml()
 
 
-def yaml2toml():
+def yaml2toml() -> None:
     tomlop = Tomlop()
     tomlop.yaml2toml()
 
