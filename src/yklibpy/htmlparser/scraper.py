@@ -4,11 +4,12 @@ from typing import Any, Dict, Optional
 from bs4 import BeautifulSoup
 
 from yklibpy.common.info import Info
+from yklibpy.common.loggerx import Loggerx
 from yklibpy.common.util import Util
 
 
 class Scraper:
-    def __init__(self, sequence: int):
+    def __init__(self, sequence: int) -> None:
         """Initialize in-memory containers for links and bookkeeping.
 
         Returns:
@@ -21,7 +22,7 @@ class Scraper:
         self.no_append_count = 0
 
     @classmethod
-    def _to_assoc(cls, title: str, url: str, sequence: int):
+    def _to_assoc(cls, title: str, url: str, sequence: int) -> dict[str, Any]:
         return {"title": title, "url": url, "sequence_array": set([sequence])}
 
     @classmethod
@@ -81,7 +82,7 @@ class Scraper:
             Loggerx.error(f"An error occurred: {e}", __name__)
             return None
 
-    def scrape(self, info: Info):
+    def scrape(self, info: Info) -> None:
         """Primary scraping entry point; implemented by subclasses.
 
         Args:

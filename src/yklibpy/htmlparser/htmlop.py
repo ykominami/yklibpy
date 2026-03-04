@@ -1,10 +1,12 @@
+from typing import Any
+
 from yklibpy.common.loggerx import Loggerx
 from yklibpy.htmlparser.misc.anchortaginfo import AnchorTagInfo
 
 
 class HtmlOp:
     @classmethod
-    def get_anchor_under_b(cls, child, cond=None):
+    def get_anchor_under_b(cls, child: Any, cond: Any = None) -> list[list[AnchorTagInfo | None]]:
         if cond is None:
             list = child.find_all("b")
         else:
@@ -14,13 +16,13 @@ class HtmlOp:
         return assoc_array
 
     @classmethod
-    def get_anchor_all(cls, child):
+    def get_anchor_all(cls, child: Any) -> list[AnchorTagInfo | None]:
         return [
             cls.get_anchor_tag_info(anchor_tag) for anchor_tag in child.find_all("a")
         ]
 
     @classmethod
-    def get_anchor_tag_info(cls, anchor_tag):
+    def get_anchor_tag_info(cls, anchor_tag: Any) -> AnchorTagInfo | None:
         if anchor_tag is None:
             return None
 
@@ -30,7 +32,7 @@ class HtmlOp:
         return a_tag_info
 
     @classmethod
-    def get_anchor_under_div(cls, child, cond=None):
+    def get_anchor_under_div(cls, child: Any, cond: Any = None) -> None:
         if cond is None:
             list = child.find_all("div", cond)
         else:
@@ -43,7 +45,7 @@ class HtmlOp:
                 cls.print_tag_info(anchor_tag_info)
 
     @classmethod
-    def print_tag_info(cls, assoc):
+    def print_tag_info(cls, assoc: Any) -> None:
         tag = assoc["tag"]
         Loggerx.debug(f"1 HtmlOp.print_tag_info: tag={tag}", __name__)
 

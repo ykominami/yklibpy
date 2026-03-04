@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import List, Literal
+from typing import Any, List, Literal
 
 from yklibpy.common.loggerx import Loggerx
 from yklibpy.common.util import Util
@@ -9,8 +9,8 @@ from yklibpy.htmlparser.configprepare import ConfigPrepare
 
 class Preparex:
     def __init__(
-        self, top_dir: str, category: str, config_parent_dir: str, assoc: dict
-    ):
+        self, top_dir: str, category: str, config_parent_dir: str, assoc: dict[str, Any]
+    ) -> None:
         config = ConfigPrepare(Path(config_parent_dir), assoc)
         self.parts = config.get_utility_category()
         self.top_path = Path(top_dir)
@@ -22,7 +22,7 @@ class Preparex:
         self.bat1_path.mkdir(parents=True, exist_ok=True)
         self.htmlparser_path.mkdir(parents=True, exist_ok=True)
 
-        ul = Util.UniqueList()
+        ul: Util.UniqueList[str] = Util.UniqueList()
         file_extname = config.get_category_config_file_extname()
         # file_extname_x = rf"file_extname{'$'}"
         # re_file_extname = re.compile(re.escape(file_extname_x))
@@ -62,7 +62,7 @@ class Preparex:
 
         Loggerx.debug(f"8 Preparex.ul={ul}", __name__)
 
-    def list_files_containing(self, path: Path, search_string: str) -> List[Path]:
+    def list_files_containing(self, path: Path | str, search_string: str) -> List[Path]:
         """
         指定パス直下に存在するファイルのうち、ファイル名が指定文字列を含むものをすべて列挙する
 
@@ -109,6 +109,5 @@ class Preparex:
 
         return files
 
-    def list_utility_files(self, name: str, suffix: str) -> List[Path]:
-        list = Util.list_files(name, self.parts, suffix)
-        return list
+    def list_utility_files(self, name: str, suffix: str) -> list[str]:
+        return Util.list_files(name, self.parts, suffix)

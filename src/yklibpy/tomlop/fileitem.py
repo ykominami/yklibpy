@@ -1,41 +1,51 @@
-import os
 from pathlib import Path
+from typing import Any
+
+from yklibpy.config.appconfig import AppConfig
+from yklibpy.db.storex import Storex
 
 
 class FileItem:
-    def __init__(self, file):
-        self.file_file = file
-        self.file_path = Path(file)
-        self.file_type = self.get_file_type(file) if file else None
+    @classmethod
+    def setup(cls, file_type_dict: dict[str, str] = AppConfig.file_type_dict) -> None:
+        Storex.set_file_type_dict(file_type_dict)
 
-    def get_file_type(self, file_path):
-        """
-        引数で指定されたファイルのパスから拡張子を取り出し、大文字小文字の区別なく、
-        ファイルの種別を文字列で返す。
-
-        Args:
-            file_path: ファイルパス
-
-        Returns:
-            "YAML": .yaml, .yml の場合
-            "JSON": .json の場合
-            "TOML": .toml の場合
-            "TEXT": .txt の場合
-            "OTHER": 上記以外の場合
-            None: file_path が None の場合
-        """
-        if file_path is None:
-            return None
-        _, ext = os.path.splitext(file_path)
-        ext_lower = ext.lower()
-
-        if ext_lower in [".yaml", ".yml"]:
-            return "YAML"
-        elif ext_lower == ".json":
-            return "JSON"
-        elif ext_lower == ".toml":
-            return "TOML"
-        elif ext_lower == ".txt":
-            return "TEXT"
+    def __init__(
+        self,
+        file: str | Path | list[str] | list[Path],
+        data: Any = None,
+    ) -> None:
+        if isinstance(file, list):
+            filex = file.pop(0)
+            if isinstance(filex, str):
+                self.file_path = Path(filex)
+            else:
+                self.file_path = filex
+                for file_name in file:
+                    self.file_path = self.file_path / Path(file_name)
         else:
-            return "OTHER"
+            self.file_path = Path(file)
+
+        file_type = AppConfig.get_file_type(str(self.file_path))
+        if file_type is None:
+            raise ValueError(f"Unsupported file type: {self.file_path}")
+        self.file_type = file_type
+        self.storex = Storex(self.file_type, [self.file_path], data)
+            
+    def get_file_type(self, file_path: str | Path | None) -> str | None:
+        return AppConfig.get_file_type(str(file_path) if file_path is not None else None)
+
+    def set_data(self, data: dict[str, Any]) -> None:
+        self.storex.set_data(data)
+
+    def output(self, data: Any = None) -> None:
+        self.storex.output(data)
+
+    def get_name(self) -> str:
+        return self.storex.get_name()
+
+    def get_path(self) -> Path:
+        return self.storex.get_path()
+
+    def with_suffix(self, suffix: str) -> Path:
+        return self.file_path.with_suffix(suffix)

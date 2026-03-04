@@ -18,7 +18,7 @@ class AppStore:
         self.directory_assoc = directory_assoc if directory_assoc is not None else {}
         self.set_ext_name()
 
-    def set_ext_name(self):
+    def set_ext_name(self) -> None:
         Loggerx.debug(f'1 AppStore.set_ext_name: self.file_assoc={self.file_assoc}', __name__)
         Loggerx.debug(f'2 AppStore.set_ext_name: self.directory_assoc={self.directory_assoc}', __name__)
         for kind in self.file_assoc:
@@ -29,7 +29,7 @@ class AppStore:
                 file_type = self.file_assoc[kind][base_name][AppConfig.FILE_TYPE]
                 self.file_assoc[kind][base_name][AppConfig.EXT_NAME] = Storex.get_ext_name(file_type)
 
-    def prepare_config_file_and_db_file(self):
+    def prepare_config_file_and_db_file(self) -> None:
         for kind in self.file_assoc:
             for base_name in self.file_assoc[kind]:
                 file_item_assoc = self.file_assoc[kind][base_name]
@@ -39,10 +39,18 @@ class AppStore:
                 else:
                     self.file_assoc[kind][base_name][AppConfig.PATH] = file
 
-    def prepare_config_directory_and_db_directory(self):
+    def prepare_config_directory_and_db_directory(self) -> None:
         for kind in self.directory_assoc:
             for base_name in self.directory_assoc[kind]:
                 self.mkdir_db(base_name)
+
+    def prepare_config_directory(self) -> None:
+        for base_name in self.directory_assoc['config']:
+            self.mkdir_db(base_name)
+
+    def prepare_db_directory(self) -> None:
+        for base_name in self.directory_assoc['db']:
+            self.mkdir_db(base_name)
 
     def load_file_db_all(self) -> None:
         kind = AppConfig.KIND_DB
@@ -142,7 +150,7 @@ class AppStore:
         file = Storex(assoc[AppConfig.FILE_TYPE], file_name_array)
         return file
 
-    def get_config_file_for_win(self, user: str | None, base_name: str, ext_name: str):
+    def get_config_file_for_win(self, user: str | None, base_name: str, ext_name: str) -> list[str]:
         config_top_dir = Path(
             os.environ.get("APPDATA", str(self.home_path / "AppData" / "Roaming"))
         )
@@ -154,7 +162,7 @@ class AppStore:
 
         return config_file_name_array
 
-    def get_db_file_for_win(self, user: str | None,base_name: str, ext_name: str):
+    def get_db_file_for_win(self, user: str | None,base_name: str, ext_name: str) -> list[str]:
         data_top_dir = Path(
             os.environ.get("LOCALAPPDATA", str(self.home_path / "AppData" / "Local"))
         )
@@ -166,7 +174,7 @@ class AppStore:
 
         return db_file_name_array
 
-    def get_config_file_for_unix(self, user: str | None,base_name: str, ext_name: str):
+    def get_config_file_for_unix(self, user: str | None,base_name: str, ext_name: str) -> list[str]:
         file_name = f"{base_name}{ext_name}"
         if  user is not None:
             config_file_name_array = [
@@ -187,7 +195,7 @@ class AppStore:
             
         return config_file_name_array
 
-    def get_db_file_for_unix(self, user: str | None, base_name: str, ext_name: str):
+    def get_db_file_for_unix(self, user: str | None, base_name: str, ext_name: str) -> list[str]:
         file_name = f"{base_name}{ext_name}"
         if user is not None and user != "":
             db_file_name_array = [
@@ -247,6 +255,7 @@ class AppStore:
             dir_path = data_top_dir / self.prog_name / key
 
         dir_path.mkdir(parents=True, exist_ok=True)
+        Loggerx.debug(f'10 AppStore.mkdir_db: dir_path={dir_path}', __name__)
         self.directory_assoc[AppConfig.KIND_DB][key][AppConfig.PATH] = dir_path
 
     def show(self, kind: str, base_name: str) -> None:

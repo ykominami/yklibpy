@@ -10,7 +10,7 @@ class UtilYaml:
     _constructors_registered = False
 
     @classmethod
-    def ignore_python_object_tag(cls, loader, node):
+    def ignore_python_object_tag(cls, loader: Any, node: Any) -> Any:
         """カスタムタグを辞書として読み込む"""
         if isinstance(node, yaml.MappingNode):
             return loader.construct_mapping(node, deep=True)
@@ -20,7 +20,7 @@ class UtilYaml:
             return loader.construct_scalar(node)
 
     @classmethod
-    def _register_constructors(cls, tags: list[str]):
+    def _register_constructors(cls, tags: list[str]) -> None:
         Loggerx.debug(f"1 UtilYaml._register_constructors: {tags}", __name__)
         if not cls._constructors_registered:
             Loggerx.debug(f"2 UtilYaml._register_constructors: {tags}", __name__)
@@ -36,7 +36,7 @@ class UtilYaml:
         cls._constructors_registered = True
 
     @classmethod
-    def safe_load(cls, f):
+    def safe_load(cls, f: Any) -> Any:
         return yaml.load(f, Loader=yaml.SafeLoader)
 
     @classmethod
@@ -50,7 +50,7 @@ class UtilYaml:
             dict: Parsed YAML content.
         """
         data = {}
-        Loggerx._debug(f"1 UtilYaml.load_yaml: input_path={input_path}", __name__)
+        Loggerx.debug(f"1 UtilYaml.load_yaml: input_path={input_path}", __name__)
         with open(input_path, "r", encoding="utf-8") as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
         if data is None:
