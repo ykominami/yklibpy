@@ -18,7 +18,7 @@ class Loggerx:
             logger = logging.getLogger(name)
             cls._loggers[name] = logger
 
-        logger.setLevel(log_level)
+        logger.setLevel(cls._log_level)
         return logger
 
     @classmethod
