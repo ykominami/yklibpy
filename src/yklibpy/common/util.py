@@ -467,7 +467,7 @@ class Util:
         return "".join(non_printable)  # ['\n', '\t', '\x00']
 
     @classmethod
-    def get_valie_string(cls, string: str|None) -> str:
+    def get_valid_string(cls, string: str|None) -> str:
         if string is None:
             return ""
         if len(string) == 0:
@@ -476,12 +476,12 @@ class Util:
 
     @classmethod
     def is_empty(cls, string: str) -> bool:
-        valid_string = cls.get_valie_string(string)
+        valid_string = cls.get_valid_string(string)
         return len(valid_string) == 0
 
     @classmethod
-    def normalize_string(cls, string: str | None) -> str | None:
-        valid_string = cls.get_valie_string(string)
+    def normalize_string(cls, string: str | None) -> str:
+        valid_string = cls.get_valid_string(string)
         if cls.is_empty(valid_string):
             return None
         else:
