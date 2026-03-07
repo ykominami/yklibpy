@@ -3,6 +3,8 @@ from yklibpy.common.util import Util
 
 
 class CommandGhUser(Command):
+    DEFAULT_VALUE_USER = None
+
     def __init__(self) -> None:
         pass
 
