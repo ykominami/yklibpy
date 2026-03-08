@@ -35,12 +35,10 @@ class AppConfig:
     file_synonym_dict: ClassVar[dict[str, str]] = {
         ".yaml": ".yml",
     }
+    # クラスAppConfigを継承したクラスで拡張するときのためにエントリの身を用意しておく
     directory_assoc: ClassVar[dict[str, dict[str, dict[str, Any]]]] = {
-        KIND_DB: {
-            BASE_NAME_CONFIG: {
-                PATH: {},
-            }
-        }
+        KIND_CONFIG: {},
+        KIND_DB: {}
     }
 
     file_assoc: ClassVar[dict[str, dict[str, dict[str, Any]]]] = {
