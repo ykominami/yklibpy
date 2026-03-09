@@ -66,20 +66,28 @@ class Scraper:
             the file is missing or parsing fails.
         """
         try:
-            encoding = Util.detect_encoding(file_path)
-            if encoding is None:
-                encoding = "utf-8"
-
-            with file_path.open("r", encoding=encoding) as f:
-                # Create a BeautifulSoup object using the lxml parser
-                # soup = BeautifulSoup(f, 'lxml')
-                soup = BeautifulSoup(f, "html5lib")
-                return soup
+            try:
+                encoding = Util.detect_encoding(file_path)
+            except Exception as e:
+                Loggerx.error(f"An error occurred: {e}", __name__)
+                Loggerx.error(f"Encoding detection failed for file: {file_path}", __name__)
+                return None
+            try:
+                with file_path.open("r", encoding=encoding) as f:
+                    # Create a BeautifulSoup object using the lxml parser
+                    # soup = BeautifulSoup(f, 'lxml')
+                    soup = BeautifulSoup(f, "html5lib")
+                    return soup
+            except Exception as e:
+                Loggerx.error(f"An error occurred: {e}", __name__)
+                Loggerx.error(f"file_path: {file_path}", __name__)
+                return None
         except FileNotFoundError:
             Loggerx.error(f"Error: The file at {file_path} was not found.", __name__)
             return None
         except Exception as e:
             Loggerx.error(f"An error occurred: {e}", __name__)
+            Loggerx.error(f"file_path: {file_path}", __name__)
             return None
 
     def scrape(self, info: Info) -> None:
