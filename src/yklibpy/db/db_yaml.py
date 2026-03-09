@@ -20,7 +20,12 @@ class DbYaml(DbBase):
         Util.ensure_file_path(self.fname_path)
 
         if encoding is None:
-            encoding = Util.detect_encoding(self.fname_path)
+            try:
+                encoding = Util.detect_encoding(self.fname_path)
+            except Exception as e:
+                Loggerx.error(f"An error occurred: {e}", __name__)
+                Loggerx.error(f"Encoding detection failed for file: {self.fname_path}", __name__)
+                return {}
         if encoding is None:
             encoding = Util.get_default_encoding()
 
