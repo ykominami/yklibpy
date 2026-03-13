@@ -5,8 +5,11 @@ from yklibpy.htmlparser.misc.anchortaginfo import AnchorTagInfo
 
 
 class HtmlOp:
+    """BeautifulSoup 要素からアンカー情報を取り出す補助クラス。"""
+
     @classmethod
     def get_anchor_under_b(cls, child: Any, cond: Any = None) -> list[list[AnchorTagInfo | None]]:
+        """`b` 要素配下のアンカー情報を配列で返す。"""
         if cond is None:
             list = child.find_all("b")
         else:
@@ -17,12 +20,14 @@ class HtmlOp:
 
     @classmethod
     def get_anchor_all(cls, child: Any) -> list[AnchorTagInfo | None]:
+        """要素配下のすべてのアンカーを `AnchorTagInfo` へ変換する。"""
         return [
             cls.get_anchor_tag_info(anchor_tag) for anchor_tag in child.find_all("a")
         ]
 
     @classmethod
     def get_anchor_tag_info(cls, anchor_tag: Any) -> AnchorTagInfo | None:
+        """単一のアンカー要素から `AnchorTagInfo` を作成する。"""
         if anchor_tag is None:
             return None
 
@@ -33,6 +38,7 @@ class HtmlOp:
 
     @classmethod
     def get_anchor_under_div(cls, child: Any, cond: Any = None) -> None:
+        """`div` 要素配下のアンカー情報をログへ出力する。"""
         if cond is None:
             list = child.find_all("div", cond)
         else:
@@ -46,6 +52,7 @@ class HtmlOp:
 
     @classmethod
     def print_tag_info(cls, assoc: Any) -> None:
+        """アンカー情報辞書の内容をデバッグログへ整形出力する。"""
         tag = assoc["tag"]
         Loggerx.debug(f"1 HtmlOp.print_tag_info: tag={tag}", __name__)
 

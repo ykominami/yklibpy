@@ -4,7 +4,10 @@ from bs4.element import PageElement
 
 
 class Tagx:
+    """BeautifulSoup 要素から表示用情報を抜き出して保持する。"""
+
     def __init__(self, tag: Optional[PageElement], namex: str) -> None:
+        """タグ本体とログ出力向けの文字列表現を初期化する。"""
         self.option: str = ""
         self.tag = tag
         self.strx = str(tag)
@@ -23,7 +26,9 @@ class Tagx:
                 self.mes_name = f"  {namex}.name: [Nothing]"
 
     def set_option(self, option: str) -> None:
+        """外部で整形した補助文字列を保持する。"""
         self.option = option
 
     def get_option(self) -> str:
+        """保持している補助文字列を返す。"""
         return self.option

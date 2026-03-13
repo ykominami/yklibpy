@@ -7,16 +7,10 @@ from yklibpy.common.loggerx import Loggerx
 
 
 class Env:
+    """設定ファイルからスクレイピング対象の環境情報を組み立てる。"""
+
     def __init__(self, config_path: Path | None = None) -> None:
-        """Load configuration and initialize base path/mode settings.
-
-        Args:
-            config_path (Path | None): YAML containing ``base_path`` and pattern
-                associations. When ``None`` the environment starts empty.
-
-        Returns:
-            None
-        """
+        """設定パスを読み込み、基準パスとパターン情報を初期化する。"""
         self.sequence = -1
         self.base_path: Path = Path(".")
         self.pattern: str | None = None
@@ -29,15 +23,7 @@ class Env:
                 self.base_path = self.make_path(base_path_array)
 
     def make_path(self, path_array: list[str]) -> Path:
-        """Convert a sequence of path components into a concrete path.
-
-        Args:
-            path_array (list[str]): Ordered segments such as
-                ``['C:/data', 'courses']``.
-
-        Returns:
-            Path | None: Composed path or ``None`` when no components exist.
-        """
+        """パス要素の配列から実際の `Path` を組み立てる。"""
         base_path = Path(".")
         top_dir = path_array.pop(0)
         top_path = Path(top_dir)
@@ -46,36 +32,18 @@ class Env:
         return base_path
 
     def mode(self) -> str:
-        """Return the scraper mode stored in the active pattern.
-
-        Returns:
-            str: Mode string, defaulting to ``"H3"`` when unspecified.
-        """
+        """現在の設定に対応するスクレイパーモードを返す。"""
         mode = cast(str | None, self.config.get("mode"))
         if mode is None:
             return "H3"
         return mode
 
     def set_base_path(self, base_path: Path) -> None:
-        """Persist an externally provided root directory.
-
-        Args:
-            base_path (Path): Directory serving as the root for pattern paths.
-
-        Returns:
-            None
-        """
+        """探索基準となるベースパスを設定する。"""
         self.base_path = base_path
 
     def set_pattern(self, pattern: str) -> dict[str, Any] | None:
-        """Load the configuration block associated with ``pattern``.
-
-        Args:
-            pattern (str): Key in ``assoc`` (e.g., ``'Udemy-2-file'``).
-
-        Returns:
-            dict | None: Selected configuration or ``None`` when unknown.
-        """
+        """指定パターンに対応する設定ブロックを選択する。"""
         self.pattern = pattern
         if pattern not in self.assoc:
             return None
@@ -83,11 +51,7 @@ class Env:
         return self.config
 
     def get_files(self) -> list[Path]:
-        """Resolve the files or directory contents defined by the pattern.
-
-        Returns:
-            List[Path]: Concrete file paths ready for scraping.
-        """
+        """現在の設定から処理対象ファイル一覧を解決する。"""
         Loggerx.error(f"env:get_files self.config={self.config}", __name__)
         if len(self.config) == 0:
             Loggerx.error("0 env:get_files", __name__)

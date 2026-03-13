@@ -59,26 +59,37 @@ _export_classes_from_submodules()
 
 
 class Util:
+    """文字列処理、パス探索、表形式変換などの汎用処理を集約する。"""
+
     class UniqueList(Generic[T]):
+        """重複を除きつつ追加順を保つリスト。"""
+
         def __init__(self) -> None:
+            """内部の集合と順序付き配列を初期化する。"""
             self._set: set[T] = set()
             self._list: list[T] = []
 
         def append(self, value: T) -> None:
+            """未登録の値だけを末尾へ追加する。"""
             if value not in self._set:
                 self._set.add(value)
                 self._list.append(value)
 
         def __iter__(self) -> Iterator[T]:
+            """保持順のまま反復できるイテレータを返す。"""
             return iter(self._list)
 
         def __repr__(self) -> str:
+            """デバッグ用に内部リストの表現を返す。"""
             return repr(self._list)
 
     class Result:
+        """URL 検証結果を表す単純なデータ保持クラス。"""
+
         def __init__(
             self, success: bool, url: str, reason: str, parsed: ParseResult | None
         ) -> None:
+            """検証成否、対象 URL、理由、解析結果を保持する。"""
             self.success = success
             self.url = url
             self.reason = reason
@@ -86,11 +97,12 @@ class Util:
 
     @classmethod
     def get_location(cls) -> str:
+        """このモジュールファイルの位置を文字列で返す。"""
         return f"{__file__}"
 
     @classmethod
     def get_location_string(cls) -> str:
-        """現在の位置を文字列で返す"""
+        """呼び出し元のファイル名、行番号、関数名を返す。"""
         frame = inspect.currentframe()
         if frame and frame.f_back:
             caller = frame.f_back
@@ -107,14 +119,7 @@ class Util:
         pattern: str,
         target_type: TargetType = "both",
     ) -> list[Path]:
-        """
-        指定ディレクトリ配下を再帰的に探索し、パターンに一致するパスを取得する
-
-        :param base_dir: 探索開始ディレクトリ (Path)
-        :param pattern: globパターン (例: "*.py", "data_*")
-        :param target_type: "file" | "dir" | "both"
-        :return: Path のリスト
-        """
+        """再帰探索で条件に一致するパス一覧を返す。"""
         if not base_dir.is_dir():
             raise ValueError(f"{base_dir} はディレクトリではありません")
 
@@ -136,14 +141,17 @@ class Util:
 
     @classmethod
     def xyz(cls) -> None:
+        """簡易動作確認用に固定文字列を出力する。"""
         print("xyz")
 
     @classmethod
     def list_files(cls, name: str, parts: Sequence[str], suffix: str) -> list[str]:
+        """名前、区分、拡張子からファイル名候補を組み立てる。"""
         return [f"{name}-{part}{suffix}" for part in parts]
 
     @classmethod
     def is_valid_urls(cls, urls: List[str]) -> List["Util.Result"]:
+        """URL 一覧を検証し、各要素の結果を配列で返す。"""
         result_array: list[Util.Result] = []
         for url in urls:
             if url == "" or url is None:
@@ -174,16 +182,19 @@ class Util:
 
     @classmethod
     def extract_cid(cls, text: str) -> str:
+        """文字列から `cid` パラメータ値を抽出する。"""
         m = re.search(r"cid=([^/?&]+)", text)
         return m.group(1) if m else ""
 
     @classmethod
     def extract_product_id(cls, text: str) -> str:
+        """文字列から `product_id` パラメータ値を抽出する。"""
         m = re.search(r"product_id=([^/?&]+)", text)
         return m.group(1) if m else ""
 
     @classmethod
     def extract_base(cls, base: str, text: str) -> str | None:
+        """指定名のクエリパラメータ値を抽出する。"""
         re_text = f"{base}=([^/?&]+)"
         regexp = re.compile(re_text)
         m = regexp.search(text)
@@ -191,6 +202,7 @@ class Util:
 
     @classmethod
     def flatten_gen(cls, lst: list[Any]) -> Iterator[Any]:
+        """入れ子リストを再帰的に平坦化するジェネレータを返す。"""
         for item in lst:
             if isinstance(item, list):
                 yield from Util.flatten_gen(item)
@@ -199,6 +211,7 @@ class Util:
 
     @classmethod
     def ensure_file_path(cls, path: Path | None) -> Path | None:
+        """ファイルと親ディレクトリの存在を保証して返す。"""
         if path is None:
             return None
         if not path.exists():
@@ -211,6 +224,7 @@ class Util:
 
     @classmethod
     def ensure_dir_path(cls, path: Path | None) -> Path | None:
+        """ディレクトリの存在を保証して返す。"""
         if path is None:
             return None
         Loggerx.debug(f'12 Util.ensure_dir_path: path={path}', __name__)
@@ -219,14 +233,7 @@ class Util:
 
     @classmethod
     def flatten(cls, items: Iterable[Any]) -> list[Any]:
-        """Flatten arbitrarily nested iterables into a single list.
-
-        Args:
-            items (Iterable): Possibly nested lists/tuples of values.
-
-        Returns:
-            list: Flattened sequence preserving order.
-        """
+        """入れ子の配列を順序を保ったまま 1 次元化する。"""
         flat_list = []
         for item in items:
             if isinstance(item, list):
@@ -238,6 +245,7 @@ class Util:
 
     @classmethod
     def detect_encoding(cls, input_path: Path) -> Optional[str]:
+        """ファイル内容から推定される文字エンコーディングを返す。"""
         if input_path is not None:
             with open(input_path, "rb") as f:
                 raw = f.read()
@@ -247,31 +255,16 @@ class Util:
 
     @classmethod
     def get_default_encoding(cls) -> str:
+        """実行環境の既定エンコーディングを返す。"""
         enc = locale.getpreferredencoding(False)
         return enc
 
     @classmethod
     def get_common_parents(cls, element1: Tag, element2: Tag) -> List[Tag]:
-        """2つのBeautifulSoup要素の共通する親要素をすべて取得する。
-
-        Args:
-            element1 (Tag): 最初の要素
-            element2 (Tag): 2番目の要素
-
-        Returns:
-            List[Tag]: 共通する親要素のリスト（ルートから近い順、つまり最も近い共通親が最後）
-
-        Examples:
-            >>> from bs4 import BeautifulSoup
-            >>> soup = BeautifulSoup('<div><p><span>text1</span></p><p><span>text2</span></p></div>', 'html.parser')
-            >>> span1 = soup.find_all('span')[0]
-            >>> span2 = soup.find_all('span')[1]
-            >>> common_parents = Util.get_common_parents(span1, span2)
-            >>> # [<div>...</div>, <html>...</html>, <body>...</body>] などが返される
-        """
+        """2 つの BeautifulSoup 要素に共通する親タグ一覧を返す。"""
 
         def get_all_parents(element: Tag) -> List[Tag]:
-            """要素のすべての親要素をルートまで取得する"""
+            """指定要素の親タグをルート方向へ順に集める。"""
             parents = []
             current = element.parent
             while current is not None and hasattr(current, "name"):
@@ -304,19 +297,7 @@ class Util:
     def load_tsv(
         cls, input_path: Path, fieldnames: Optional[Sequence[str]] = None
     ) -> list[dict[str, str]]:
-        """Read a TSV file and convert rows into dictionaries.
-
-        Args:
-            input_path (Path): TSV file path.
-            fieldnames (Sequence[str] | None): Explicit headers. When ``None`` the
-                first row becomes the header.
-
-        Returns:
-            list[dict]: Each row keyed by the header columns.
-
-        Raises:
-            ValueError: If no headers can be determined.
-        """
+        """TSV ファイルを読み込み、行ごとの辞書配列へ変換する。"""
         records: list[dict[str, str]] = []
         with open(input_path, "r", encoding="utf-8", newline="") as f:
             reader = csv.reader(f, delimiter="\t")
@@ -341,20 +322,7 @@ class Util:
         output_path: Optional[Path] = None,
         fieldnames: Optional[Sequence[str]] = None,
     ) -> str:
-        """Write record dictionaries to TSV format.
-
-        Args:
-            records (Sequence[dict]): Rows to emit.
-            output_path (Path | None): Optional destination file.
-            fieldnames (Sequence[str] | None): Header order override; defaults to
-                keys of the first record.
-
-        Returns:
-            str: TSV string containing the headers and rows.
-
-        Raises:
-            ValueError: If neither records nor ``fieldnames`` are provided.
-        """
+        """辞書配列を TSV 文字列へ変換し、必要ならファイルへ出力する。"""
         if not records and fieldnames is None:
             raise ValueError(
                 "fieldnamesを指定するか、recordsに1件以上のデータを含めてください。"
@@ -383,11 +351,7 @@ class Util:
         return tsv_str
 
     def test_yaml(self, input_file: str, input_file_2: str, output_file: str) -> None:
-        """Developer helper for merging Udemy YAML progress data.
-
-        Returns:
-          None
-        """
+        """Udemy 用 YAML データを比較し、進捗列を引き継いで保存する。"""
         input_path = Path(input_file)
         input_path_2 = Path(input_file_2)
         output_path = Path(output_file)
@@ -420,11 +384,7 @@ class Util:
         UtilYaml.save_yaml(dict_2, output_path)
 
     def test_tsv(self, input_file: str, input_file_2: str, output_file: str) -> None:
-        """Developer helper for merging Udemy TSV progress data.
-
-        Returns:
-          None
-        """
+        """Udemy 用 TSV データを比較し、進捗列を引き継いで保存する。"""
         input_path = Path(input_file)
         # yaml_dict = UtilYaml.load_yaml(input_path)
 
@@ -449,6 +409,7 @@ class Util:
 
     @classmethod
     def remove_crlf(cls, string: str) -> str:
+        """文字列から改行コードを取り除く。"""
         # 改行文字のみ抽出
         #newlines = [c for c in string if c in ("\n", "\r")]
         newlines = string.replace("\n", "").replace("\r", "")
@@ -456,6 +417,7 @@ class Util:
 
     @classmethod
     def remove_whitespace(cls, string: str) -> str:
+        """文字列から空白類を取り除く。"""
         # 改行文字のみ抽出
         # whitespace = re.findall(r'\s+', string)
         whitespace = "".join(string.split())
@@ -463,11 +425,13 @@ class Util:
 
     @classmethod
     def remove_non_printable(cls, string: str) -> str:
+        """文字列から表示不能文字を取り除く。"""
         non_printable = [c for c in string if c.isprintable()]
         return "".join(non_printable)  # ['\n', '\t', '\x00']
 
     @classmethod
     def get_valid_string(cls, string: str | None) -> str:
+        """`None` や空白だけの入力を空文字へ正規化する。"""
         if string is None:
             return ""
         if len(string) == 0:
@@ -476,11 +440,13 @@ class Util:
 
     @classmethod
     def is_empty(cls, string: str | None) -> bool:
+        """入力が実質的に空文字かどうかを判定する。"""
         valid_string = cls.get_valid_string(string)
         return len(valid_string) == 0
 
     @classmethod
     def normalize_string(cls, string: str | None) -> str | None:
+        """有効な文字列だけを返し、空なら `None` を返す。"""
         valid_string = cls.get_valid_string(string)
         if cls.is_empty(valid_string):
             return None
@@ -491,29 +457,7 @@ class Util:
     def array_to_dict(
         cls, data: list[dict[str, Any]], key: str
     ) -> dict[str, dict[str, Any]]:
-        """
-        JSON形式文字列の配列から、指定文字列をキーとする連想配列に変換する。
-
-        Args:
-            data: 辞書のリスト（JSON配列をパースしたもの）
-            key: 連想配列のキーとして使用するフィールド名
-
-        Returns:
-            指定したキーをキーとし、元の要素を値とする連想配列（辞書）
-
-        Raises:
-            KeyError: 指定したキーが要素に存在しない場合
-            TypeError: 要素が辞書でない場合
-
-        Example:
-            >>> ghprj = Ghprj()
-            >>> data = [
-            ...     {"name": "repo1", "url": "https://example.com/repo1"},
-            ...     {"name": "repo2", "url": "https://example.com/repo2"}
-            ... ]
-            >>> result = ghprj.array_to_dict(data, "name")
-            >>> print(result["repo1"])  # {"name": "repo1", "url": "https://example.com/repo1"}
-        """
+        """辞書配列を指定キーで引ける連想配列へ変換する。"""
         result: dict[str, dict[str, Any]] = {}
         for item in data:
             if not isinstance(item, dict):
@@ -535,6 +479,7 @@ class Util:
 
     @classmethod
     def swap_dict(cls, dict: dict[str, str]) -> dict[str, str]:
+        """キーと値を入れ替えた辞書を返す。"""
         return {v: k for k, v in dict.items()} if dict else {}
 
 if __name__ == "__main__":

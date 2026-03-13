@@ -14,11 +14,13 @@ __all__ = [
 
 
 def xmain() -> str:
+    """HTML パーサパッケージの疎通確認用メッセージを返す。"""
     print("Hello from yklibpy!")
     return "Hello from yklibpy!"
 
 
 def ymain() -> str:
+    """HTML パーサパッケージの別系統の疎通確認用メッセージを返す。"""
     print("Y Hello from yklibpy!")
     return "Y Hello from yklibpy!"
 

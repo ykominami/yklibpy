@@ -10,11 +10,13 @@ __all__ = ["Env", "Info", "Util", "UtilYaml", "UtilJson", "SafeDict", "Timex"]
 
 
 def xmain() -> str:
+    """共通パッケージの疎通確認用メッセージを返す。"""
     print("Hello from yklibpy!")
     return "Hello from yklibpy!"
 
 
 def ymain() -> str:
+    """共通パッケージの別系統の疎通確認用メッセージを返す。"""
     print("Y Hello from yklibpy!")
     return "Y Hello from yklibpy!"
 

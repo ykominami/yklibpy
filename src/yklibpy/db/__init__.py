@@ -15,6 +15,7 @@ __all__ = [
 
 
 def get_or_create_db(kind: str, fname: str) -> DbYaml | None:
+    """種類に応じた DB オブジェクトを生成する。"""
     if kind.lower() == "yaml":
         db = DbYaml(fname)
     else:
@@ -23,10 +24,12 @@ def get_or_create_db(kind: str, fname: str) -> DbYaml | None:
 
 
 def db_yaml_x() -> DbYaml:
+    """既定の DB ファイル名で YAML DB を生成する。"""
     return db_yaml("db.yml")
 
 
 def db_yaml(db_file: str) -> DbYaml:
+    """YAML DB を読み込み、初期値を書き込んで返す。"""
     db = get_or_create_db("yaml", db_file)
     if db is None:
         raise ValueError("Failed to create database")

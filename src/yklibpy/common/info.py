@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 
 
 class Info:
+    """解析済み HTML と処理件数をひとまとめに保持する。"""
+
     def __init__(
         self,
         file_path: Path,
@@ -12,18 +14,7 @@ class Info:
         append_count: int,
         no_append_count: int,
     ) -> None:
-        """Bundle parsed HTML and bookkeeping counters.
-
-        Args:
-          file_path (Path): Source HTML path.
-          name (str): Friendly identifier, typically the filename.
-          soup (BeautifulSoup): Parsed DOM tree to inspect.
-          append_count (int): Number of records added so far.
-          no_append_count (int): Number of skipped records.
-
-        Returns:
-          None
-        """
+        """入力ファイルと DOM、集計用カウンタを初期化する。"""
         self.file_path = file_path
         self.name = name
         self.soup = soup

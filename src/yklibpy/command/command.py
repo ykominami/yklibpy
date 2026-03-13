@@ -8,7 +8,10 @@ from yklibpy.db.appstore import AppStore
 
 
 class Command:
+    """外部コマンド実行と実行回数管理を提供する。"""
+
     def __init__(self) -> None:
+        """互換性維持のための空初期化を行う。"""
         pass
 
     def run_command(
@@ -18,28 +21,7 @@ class Command:
         encoding: str = "utf-8",
         timeout: Optional[int] = None,
     ) -> tuple[str, int]:
-        """
-        コマンドラインを実行して、標準出力への出力を文字列として受け取る。
-
-        Args:
-            command: 実行するコマンド（文字列またはリスト）
-            shell: shell経由で実行するかどうか（デフォルト: False）
-            encoding: 出力のエンコーディング（デフォルト: utf-8）
-            timeout: タイムアウト秒数（デフォルト: None）
-
-        Returns:
-            (標準出力の文字列, 終了コード) のタプル
-
-        Raises:
-            subprocess.TimeoutExpired: タイムアウトが発生した場合
-            subprocess.SubprocessError: その他のサブプロセスエラー
-
-        Example:
-            >>> ghprj = Ghprj()
-            >>> output, return_code = ghprj.run_command("echo hello")
-            >>> print(output)  # "hello\\n"
-            >>> print(return_code)  # 0
-        """
+        """コマンドを実行し、標準出力と終了コードを返す。"""
         try:
             result = subprocess.run(
                 command,
@@ -62,25 +44,7 @@ class Command:
             raise
 
     def run_command_simple(self, command: str | list[str], shell: bool = False) -> str:
-        """
-        コマンドラインを実行して、標準出力への出力を文字列として受け取る（シンプル版）。
-        エラー時は例外を発生させる。
-
-        Args:
-            command: 実行するコマンド（文字列またはリスト）
-            shell: shell経由で実行するかどうか（デフォルト: False）
-
-        Returns:
-            標準出力の文字列
-
-        Raises:
-            subprocess.CalledProcessError: コマンドが非ゼロの終了コードで終了した場合
-
-        Example:
-            >>> ghprj = Ghprj()
-            >>> output = ghprj.run_command_simple("echo hello")
-            >>> print(output)  # "hello\\n"
-        """
+        """終了コードを検査しながらコマンドを実行し、標準出力を返す。"""
         try:
             result = subprocess.run(
                 command,
@@ -112,6 +76,7 @@ class Command:
         force: bool = False,
         verbose: bool = False,
     ) -> str:
+        """取得回数に応じてコマンド実行を制御し、必要時のみ出力を返す。"""
         count = self.get_next_count(appstore)
         if count == 1 or force:
             message = self.run_command_simple(command, shell=shell)
@@ -124,6 +89,7 @@ class Command:
         return message
 
     def get_next_count(self, appstore: AppStore) -> int:
+        """保存済みの実行履歴から次の連番を採番して記録する。"""
         fetch_assoc_any = appstore.get_file_assoc_from_db(AppConfig.BASE_NAME_FETCH)
         fetch_assoc = cast(dict[str, str] | None, fetch_assoc_any)
 

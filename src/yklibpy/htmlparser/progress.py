@@ -2,18 +2,10 @@ from typing import Dict
 
 
 class Progress:
+    """進捗表示に必要な値をまとめて保持する。"""
+
     def __init__(self, meter_str: str, valuemin: str, valuemax: str, valuenow: str) -> None:
-        """Represent an aria-style progress meter for Udemy cards.
-
-        Args:
-          meter_str (str): Human readable label (e.g., ``"12%完了"``).
-          valuemin (str): Minimum value provided by the DOM attribute.
-          valuemax (str): Maximum value provided by the DOM attribute.
-          valuenow (str): Current progress value.
-
-        Returns:
-          None
-        """
+        """ARIA 由来の進捗属性を保持し、比較用の文字列も作る。"""
         self.meter_str = meter_str
         self.valuemin = valuemin
         self.valuemax = valuemax
@@ -21,12 +13,7 @@ class Progress:
         self.meter = f"{self.valuemin}-{self.valuemax}-{self.valuenow}"
 
     def to_dict(self) -> Dict[str, str]:
-        """Expose the progress state as a serializable dict.
-
-        Returns:
-          Dict[str, str]: Keys ``meter_str``, ``valuemin``, ``valuemax``,
-          ``valuenow``, and ``meter``.
-        """
+        """保持している進捗情報を辞書へ変換する。"""
         return {
             "meter_str": self.meter_str,
             "valuemin": self.valuemin,
