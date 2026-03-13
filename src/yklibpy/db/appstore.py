@@ -11,7 +11,7 @@ from yklibpy.db.storex import Storex
 
 class AppStore:
     def __init__(self, prog_name: str, file_assoc: dict[str, dict[str, dict[str, Any]]], user: str | None, directory_assoc: dict[str, dict[str, dict[str, Any]]] | None = None) -> None:
-        self.user = Util.normalize_string(user)
+        self.user: str | None = Util.normalize_string(user)
         if Util.is_empty(self.user):
             self.user = None
         self.home_path = Path.home()

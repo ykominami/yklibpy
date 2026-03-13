@@ -2,7 +2,7 @@ from typing import Dict
 
 
 class Progress:
-    def __init__(self, meter_str: str, valuemin: str, valuemax: str, valuenow: str):
+    def __init__(self, meter_str: str, valuemin: str, valuemax: str, valuenow: str) -> None:
         """Represent an aria-style progress meter for Udemy cards.
 
         Args:

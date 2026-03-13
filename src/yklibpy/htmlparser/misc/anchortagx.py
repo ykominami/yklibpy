@@ -6,7 +6,7 @@ from yklibpy.htmlparser.misc.tagx import Tagx
 
 
 class AnchorTagx(Tagx):
-    def __init__(self, anchor_tag: Optional[PageElement]):
+    def __init__(self, anchor_tag: Optional[PageElement]) -> None:
         super().__init__(anchor_tag, "anchor")
         self.href: str = ""
         self.text: str = ""

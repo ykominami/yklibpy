@@ -4,7 +4,7 @@ from bs4.element import PageElement
 
 
 class Tagx:
-    def __init__(self, tag: Optional[PageElement], namex: str):
+    def __init__(self, tag: Optional[PageElement], namex: str) -> None:
         self.option: str = ""
         self.tag = tag
         self.strx = str(tag)

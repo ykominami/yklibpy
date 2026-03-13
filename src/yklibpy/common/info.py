@@ -11,7 +11,7 @@ class Info:
         soup: BeautifulSoup,
         append_count: int,
         no_append_count: int,
-    ):
+    ) -> None:
         """Bundle parsed HTML and bookkeeping counters.
 
         Args:
