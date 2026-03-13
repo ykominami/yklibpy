@@ -7,11 +7,13 @@ from yklibpy.common.loggerx import Loggerx
 
 
 class UtilYaml:
+    """YAML の読み書きとカスタムタグ登録を補助する。"""
+
     _constructors_registered = False
 
     @classmethod
     def ignore_python_object_tag(cls, loader: Any, node: Any) -> Any:
-        """カスタムタグを辞書として読み込む"""
+        """未知の Python オブジェクトタグを安全な値へ変換する。"""
         if isinstance(node, yaml.MappingNode):
             return loader.construct_mapping(node, deep=True)
         elif isinstance(node, yaml.SequenceNode):
@@ -21,6 +23,7 @@ class UtilYaml:
 
     @classmethod
     def _register_constructors(cls, tags: list[str]) -> None:
+        """指定タグを `SafeLoader` で読めるように登録する。"""
         Loggerx.debug(f"1 UtilYaml._register_constructors: {tags}", __name__)
         if not cls._constructors_registered:
             Loggerx.debug(f"2 UtilYaml._register_constructors: {tags}", __name__)
@@ -37,18 +40,12 @@ class UtilYaml:
 
     @classmethod
     def safe_load(cls, f: Any) -> Any:
+        """`SafeLoader` を使って YAML を読み込む。"""
         return yaml.load(f, Loader=yaml.SafeLoader)
 
     @classmethod
     def load_yaml(cls, input_path: Path) -> dict[str, Any]:
-        """Load a YAML file and return it as a dictionary.
-
-        Args:
-            input_path (Path): Path to the YAML file.
-
-        Returns:
-            dict: Parsed YAML content.
-        """
+        """YAML ファイルを辞書として読み込む。"""
         data = {}
         Loggerx.debug(f"1 UtilYaml.load_yaml: input_path={input_path}", __name__)
         with open(input_path, "r", encoding="utf-8") as f:
@@ -61,16 +58,7 @@ class UtilYaml:
     def save_yaml(
         cls, assoc: dict[Any, Any], output_path: Optional[Path] = None
     ) -> str:
-        """Serialize a dictionary to YAML and optionally save it to disk.
-
-        Args:
-            assoc (dict): Data to dump.
-            output_path (Path | None): Destination path. When ``None`` the YAML
-                string is merely returned.
-
-        Returns:
-            str: YAML representation of ``assoc``.
-        """
+        """辞書を YAML 文字列へ変換し、必要ならファイルへ保存する。"""
         yaml_str = yaml.dump(
             assoc, default_flow_style=False, allow_unicode=True, sort_keys=False
         )

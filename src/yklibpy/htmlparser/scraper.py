@@ -9,12 +9,10 @@ from yklibpy.common.util import Util
 
 
 class Scraper:
-    def __init__(self, sequence: int) -> None:
-        """Initialize in-memory containers for links and bookkeeping.
+    """HTML からリンク連想配列を構築するスクレイパー基底クラス。"""
 
-        Returns:
-          None
-        """
+    def __init__(self, sequence: int) -> None:
+        """抽出結果と中間情報を保持する内部状態を初期化する。"""
         self.sequence = sequence
         self.links_assoc: dict[str, dict[str, Any]] = {}
         self.info: dict[str, Info] = {}
@@ -23,6 +21,7 @@ class Scraper:
 
     @classmethod
     def _to_assoc(cls, title: str, url: str, sequence: int) -> dict[str, Any]:
+        """タイトルと URL から標準的なリンク辞書を組み立てる。"""
         return {"title": title, "url": url, "sequence_array": set([sequence])}
 
     @classmethod
@@ -33,6 +32,7 @@ class Scraper:
         sequence: int,
         value_dict: dict[str, Any],
     ) -> bool:
+        """キー単位でリンク辞書を追加し、重複時は出現回数情報のみ更新する。"""
         result = False
         link = links_assoc.get(key, None)
         if link is None:
@@ -44,27 +44,12 @@ class Scraper:
         return result
 
     def _extract_links_assoc_from_info(self, info: Info) -> Dict[str, Dict[str, Any]]:
-        """Populate the associative map keyed by course ID.
-
-        Args:
-          info (Info): Parsed HTML payload for a file.
-
-        Returns:
-          dict: ``links_assoc`` containing course records.
-        """
+        """`Info` を元に抽出処理を実行し、リンク連想配列を返す。"""
         self.scrape(info)
         return self.links_assoc
 
     def _parse_html_file(self, file_path: Path) -> Optional[BeautifulSoup]:
-        """Read an HTML file and parse it into BeautifulSoup.
-
-        Args:
-            file_path (Path): Path to the HTML file on disk.
-
-        Returns:
-            BeautifulSoup | None: Parsed DOM on success, otherwise ``None`` when
-            the file is missing or parsing fails.
-        """
+        """HTML ファイルを読み込み、`BeautifulSoup` へ変換する。"""
         try:
             try:
                 encoding = Util.detect_encoding(file_path)
@@ -91,25 +76,11 @@ class Scraper:
             return None
 
     def scrape(self, info: Info) -> None:
-        """Primary scraping entry point; implemented by subclasses.
-
-        Args:
-          url (str): Resource identifier or file hint.
-
-        Returns:
-          None
-        """
+        """実際の抽出処理を行う拡張ポイント。サブクラスで実装する。"""
         pass
 
     def get_links_assoc_from_html(self, file_path: Path) -> Dict[str, Dict[str, Any]]:
-        """Parse an HTML file and return the associative course map.
-
-        Args:
-            file_path (Path): Location of the HTML snapshot.
-
-        Returns:
-            dict: ``links_assoc`` entries derived from the file.
-        """
+        """HTML ファイルを解析し、抽出結果の連想配列を返す。"""
         assoc = {}
         if file_path.name not in self.info.keys():
             soup = self._parse_html_file(file_path)

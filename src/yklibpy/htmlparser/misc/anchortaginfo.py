@@ -7,13 +7,17 @@ from yklibpy.htmlparser.misc.tagx import Tagx
 
 
 class AnchorTagInfo:
+    """アンカー要素と周辺ノードの情報をまとめて保持する。"""
+
     def __init__(self, anchor_tag: Optional[PageElement]) -> None:
+        """アンカー要素から関連するタグ情報の入れ物を初期化する。"""
         self.anchor = AnchorTagx(anchor_tag)
         self.parent_parent: Optional[Tagx] = None
         self.parent: Optional[Tagx] = None
         self.next_sibling: Optional[Tagx] = None
         
     def setup(self) -> None:
+        """アンカー要素の親や兄弟ノード情報を構築する。"""
         if self.anchor.tag is not None:
             self.next_sibling = Tagx(self.anchor.tag.next_sibling, "next_sibling")
             self.parent = Tagx(self.anchor.tag.next_sibling, "parent")

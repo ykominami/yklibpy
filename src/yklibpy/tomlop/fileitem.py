@@ -6,8 +6,11 @@ from yklibpy.db.storex import Storex
 
 
 class FileItem:
+    """ファイルパスと `Storex` を束ねる薄いラッパー。"""
+
     @classmethod
     def setup(cls, file_type_dict: dict[str, str] = AppConfig.file_type_dict) -> None:
+        """`Storex` で使うファイル種別定義を初期化する。"""
         Storex.set_file_type_dict(file_type_dict)
 
     def __init__(
@@ -15,6 +18,7 @@ class FileItem:
         file: str | Path | list[str] | list[Path],
         data: Any = None,
     ) -> None:
+        """入力値からファイルパスを確定し、対応する `Storex` を作る。"""
         if isinstance(file, list):
             filex = file.pop(0)
             if isinstance(filex, str):
@@ -33,19 +37,25 @@ class FileItem:
         self.storex = Storex(self.file_type, [self.file_path], data)
             
     def get_file_type(self, file_path: str | Path | None) -> str | None:
+        """パスから判定したファイル種別を返す。"""
         return AppConfig.get_file_type(str(file_path) if file_path is not None else None)
 
     def set_data(self, data: dict[str, Any]) -> None:
+        """内部 `Storex` に保持するデータを更新する。"""
         self.storex.set_data(data)
 
     def output(self, data: Any = None) -> None:
+        """データを現在のファイルパスへ出力する。"""
         self.storex.output(data)
 
     def get_name(self) -> str:
+        """ファイル名だけを返す。"""
         return self.storex.get_name()
 
     def get_path(self) -> Path:
+        """ファイルの完全パスを返す。"""
         return self.storex.get_path()
 
     def with_suffix(self, suffix: str) -> Path:
+        """同じパスに別拡張子を付けた `Path` を返す。"""
         return self.file_path.with_suffix(suffix)

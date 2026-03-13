@@ -8,9 +8,12 @@ from yklibpy.htmlparser.configprepare import ConfigPrepare
 
 
 class Preparex:
+    """関連ディレクトリを準備し、対象ファイル名を列挙する。"""
+
     def __init__(
         self, top_dir: str, category: str, config_parent_dir: str, assoc: dict[str, Any]
     ) -> None:
+        """設定値から探索対象ディレクトリ群を初期化する。"""
         config = ConfigPrepare(Path(config_parent_dir), assoc)
         self.parts = config.get_utility_category()
         self.top_path = Path(top_dir)
@@ -63,16 +66,7 @@ class Preparex:
         Loggerx.debug(f"8 Preparex.ul={ul}", __name__)
 
     def list_files_containing(self, path: Path | str, search_string: str) -> List[Path]:
-        """
-        指定パス直下に存在するファイルのうち、ファイル名が指定文字列を含むものをすべて列挙する
-
-        Args:
-          path: 検索対象のパス（Pathオブジェクトまたは文字列）
-          search_string: ファイル名に含まれる文字列
-
-        Returns:
-          条件に一致するファイルのPathオブジェクトのリスト
-        """
+        """指定ディレクトリ直下で名前に文字列を含むファイルを列挙する。"""
         target_path = Path(path) if isinstance(path, str) else path
         if not target_path.exists() or not target_path.is_dir():
             return []
@@ -85,6 +79,7 @@ class Preparex:
         return matching_files
 
     def list_files(self, path: Path, name: str) -> List[Path]:
+        """指定パス直下から条件一致ファイルを取得してログ出力する。"""
         files = self.list_files_containing(path, name)
         for file in files:
             Loggerx.debug(f'1 Preparex.list_files: file={file}', __name__)
@@ -92,6 +87,7 @@ class Preparex:
         return files
 
     def list_htmlparser_files(self, name: str) -> List[Path]:
+        """HTML パーサ出力ディレクトリから対象ファイルを列挙する。"""
         files = self.list_files_containing(self.htmlparser_path, name)
         for file in files:
             Loggerx.debug(f'3 Preparex.list_files: file={file}', __name__)
@@ -102,6 +98,7 @@ class Preparex:
         return files
 
     def list_bat1_files(self, name: str) -> List[Path]:
+        """コマンド出力ディレクトリから対象ファイルを列挙する。"""
         files = self.list_files_containing(self.bat1_path, name)
         for file in files:
             Loggerx.debug(f'8 Preparex.list_bat1_files: file={file}', __name__)
@@ -110,4 +107,5 @@ class Preparex:
         return files
 
     def list_utility_files(self, name: str, suffix: str) -> list[str]:
+        """ユーティリティカテゴリ一覧から想定ファイル名を組み立てる。"""
         return Util.list_files(name, self.parts, suffix)

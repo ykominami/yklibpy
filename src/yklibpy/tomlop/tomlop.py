@@ -13,31 +13,24 @@ from yklibpy.tomlop.fileitem import FileItem
 
 
 class Tomlop:
+    """TOML と YAML の比較、変換、出力を扱う。"""
+
     _count: int = 0
 
     def __init__(self) -> None:
+        """必要な初期化を一度だけ行い、作業用データを空にする。"""
         if Tomlop._count == 0:
             FileItem.setup()
             Tomlop._count += 1
         self.data: Any = {}
 
     def setup(self, ref_file: str | Path | list[str] | list[Path], config_file: str | Path | list[str] | list[Path] | None) -> None:
+        """比較元と設定ファイルの `FileItem` を準備する。"""
         self.ref_file_item = FileItem(ref_file)
         self.config_file_item = FileItem(config_file) if config_file is not None else None
 
     def compare_dict(self, dict1: dict[str, Any], dict2: dict[str, Any]) -> bool:
-        """
-        引数1と引数2のキーとキーに対応する値が完全に一致しているかを判定する。
-        値が連想配列の場合は再帰的に処理する。
-
-        Args:
-            dict1: 比較元の入れ子の連想配列（辞書）
-            dict2: 比較先の入れ子の連想配列（辞書）
-
-        Returns:
-            True: 引数1と引数2のキーとキーに対応する値が完全に一致している場合
-            False: 引数1と引数2のキーとキーに対応する値がどれか一つでも一致しない場合
-        """
+        """2 つの辞書が再帰的に完全一致するかを判定する。"""
         # キーの集合が一致しない場合はFalse
         if set(dict1.keys()) != set(dict2.keys()):
             return False
@@ -58,17 +51,7 @@ class Tomlop:
         return True
 
     def merge_dict(self, dict1: dict[str, Any], dict2: dict[str, Any]) -> dict[str, Any]:
-        """
-        引数2の連想配列のキーが引数1に存在しない場合、そのキーと値を引数1に追加する。
-        値が連想配列の場合は再帰的に処理する。
-
-        Args:
-            dict1: 比較元の入れ子の連想配列（辞書）
-            dict2: 比較先の入れ子の連想配列（辞書）
-
-        Returns:
-            dict1: マージ後の辞書（引数1を直接変更）
-        """
+        """不足キーだけを `dict2` から `dict1` へ補完する。"""
         for key, value in dict2.items():
             if key not in dict1:
                 # キーが存在しない場合は追加
@@ -79,18 +62,7 @@ class Tomlop:
         return dict1
 
     def diff_dict(self, dict1: dict[str, Any], dict2: dict[str, Any]) -> str:
-        """
-        比較元と比較先の入れ子の連想配列の差分を文字列として返す。
-        値が連想配列の場合は再帰的に処理する。
-
-        Args:
-            dict1: 比較元の入れ子の連想配列（辞書）
-            dict2: 比較先の入れ子の連想配列（辞書）
-
-        Returns:
-            差分がない場合: 空文字列
-            差分がある場合: 差分の状態を示す見出し行と、差分の内容を示す行からなる文字列
-        """
+        """2 つの辞書の差分を可読な文字列として返す。"""
         result_lines = []
 
         # すべてのキーを収集
@@ -141,10 +113,7 @@ class Tomlop:
         return "\n".join(result_lines) if result_lines else ""
 
     def _format_value(self, value: Any) -> str:
-        """
-        値を文字列としてフォーマットする。
-        辞書の場合は見やすい形式で表示する。
-        """
+        """差分表示用に値を短い文字列へ整形する。"""
         if isinstance(value, dict):
             # 辞書の場合は見やすい形式で表示
             items = []
@@ -158,6 +127,7 @@ class Tomlop:
             return str(value)
 
     def read_toml_external(self, file_path: str | Path) -> dict[str, Any] | None:
+        """外部 TOML ファイルを読み込み、内容を返す。"""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 Loggerx.debug(f"1 Tomlop.read_toml_external: file_path = {file_path}", __name__)
@@ -178,17 +148,7 @@ class Tomlop:
             return None
 
     def write_toml_external(self, file_path: str | Path, data: Any) -> bool:
-        """
-        tomlを用いて、引数で渡された連想配列を、引数で指定されたパスに、TOML形式ファイル出力する。
-
-        Args:
-            file_path: TOML形式ファイルへのパス
-            data: 連想配列（辞書）
-
-        Returns:
-            True: 書き込み成功
-            False: 書き込み失敗
-        """
+        """辞書データを外部 TOML ファイルへ書き出す。"""
         try:
             with open(file_path, "w", encoding="utf-8") as f:
                 toml.dump(data, f)
@@ -199,6 +159,7 @@ class Tomlop:
             return False
 
     def load_toml(self, ref_file: str | Path | None) -> dict[str, Any] | None:
+        """参照用 TOML を読み込み、内容を返す。"""
         Loggerx.debug(f"1 Tomlop.load_toml: ref_file={ref_file}", __name__)
         ref = None
         if ref_file:
@@ -211,6 +172,7 @@ class Tomlop:
         return ref
 
     def exec(self) -> None:
+        """参照ファイルとの差分を計算し、結果ファイルを出力する。"""
         ref = cast(dict[str, Any], self.ref_file_item.storex.load())
         if self.config_file_item is None:
             raise ValueError("config_file_item is not set")
@@ -231,6 +193,7 @@ class Tomlop:
         diff_yaml_file.output()
 
     def main(self) -> None:
+        """CLI 引数を解釈して主要処理を起動する。"""
         ref_file = None
         ref_file = sys.argv[1] if len(sys.argv) > 1 else None
         config_file = sys.argv[2] if len(sys.argv) > 2 else "pyproject.toml"
@@ -243,6 +206,7 @@ class Tomlop:
             FileItem(new_file_path, self.data).output()
 
     def toml2yaml(self) -> None:
+        """指定した TOML を読み込み、YAML ファイルへ変換する。"""
         src_file = sys.argv[1] if len(sys.argv) > 1 else None
         if src_file is not None:
             self.setup(src_file, None)
@@ -251,6 +215,7 @@ class Tomlop:
             UtilYaml.save_yaml(self.data, output_path)
 
     def yaml2toml(self) -> None:
+        """指定した YAML を読み込み、TOML ファイルへ変換する。"""
         input_path = Path(sys.argv[1]) if len(sys.argv) > 1 else None
         if input_path is not None:
             data: dict[str, Any] = UtilYaml.load_yaml(input_path)
@@ -260,16 +225,19 @@ class Tomlop:
 
 
 def zmain() -> None:
+    """`Tomlop.main()` を起動するエントリポイント。"""
     tomlop = Tomlop()
     tomlop.main()
 
 
 def toml2yaml() -> None:
+    """`Tomlop.toml2yaml()` を起動するエントリポイント。"""
     tomlop = Tomlop()
     tomlop.toml2yaml()
 
 
 def yaml2toml() -> None:
+    """`Tomlop.yaml2toml()` を起動するエントリポイント。"""
     tomlop = Tomlop()
     tomlop.yaml2toml()
 

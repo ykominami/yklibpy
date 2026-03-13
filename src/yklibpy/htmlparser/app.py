@@ -7,16 +7,10 @@ from yklibpy.htmlparser.scraper import Scraper
 
 
 class App:
-    """
-    HTMLファイルからリンクを抽出するアプリケーションクラス
-    """
+    """HTML ファイル群からリンク情報を集約する実行クラス。"""
 
     def __init__(self) -> None:
-        """Reset link buffers, metadata, and counters for a fresh run.
-
-        Returns:
-            None
-        """
+        """リンク集計用の内部状態を初期化する。"""
         self.links_list: list[Any] = []
         self.links_assoc: dict[str, dict[str, Any]] = {}
         self.info: dict[str, Any] = {}
@@ -24,28 +18,12 @@ class App:
         self.no_append_count = 0
 
     def create_scraper(self, mode: str, sequence: int) -> Scraper | None:
-        """Build the appropriate scraper implementation for the requested mode.
-
-        Args:
-            mode (str): Logical identifier such as ``"udemy"`` or ``"h3"``.
-
-        Returns:
-            Scraper: Concrete scraper that knows how to parse the given site, or
-            ``None`` when the mode is unsupported.
-        """
+        """モードに対応するスクレイパーを生成する。未対応時は `None` を返す。"""
         Loggerx.debug(f"1 App.create_scraper: mode={mode} is not supported", __name__)
         return None
 
     def loop(self, files: List[Path], mode: str, sequence: int) -> dict[str, dict[str, Any]]:
-        """Iterate through HTML files and accumulate extracted link metadata.
-
-        Args:
-            files (List[Path]): Collection of HTML paths to inspect.
-            mode (str): Scraper mode passed through to :meth:`create_scraper`.
-
-        Returns:
-            dict: Mapping of link identifiers to their structured attributes.
-        """
+        """対象ファイルを順に処理し、抽出したリンク情報を結合する。"""
         Loggerx.debug(f"1 App.loop: files={files}", __name__)
         assoc: dict[str, dict[str, Any]] = {}
         for file in files:
@@ -69,14 +47,7 @@ class App:
         return assoc
 
     def run(self, env: Env) -> None:
-        """Fetch file paths from the environment and scrape each one.
-
-        Args:
-            env (Env): Environment descriptor that supplies file lists and mode.
-
-        Returns:
-            None
-        """
+        """環境設定から対象ファイルを取得し、リンク情報を収集する。"""
         path_array = env.get_files()
         sequence = env.sequence
         message = f"path_array={path_array} sequence={sequence}"

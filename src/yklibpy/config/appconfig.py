@@ -5,6 +5,8 @@ from yklibpy.common.util import Util
 
 
 class AppConfig:
+    """アプリ全体で共有する設定キーとファイル種別定義を持つ。"""
+
     FILE_TYPE_YAML = "YAML"
     FILE_TYPE_JSON = "JSON"
     FILE_TYPE_TOML = "TOML"
@@ -71,6 +73,7 @@ class AppConfig:
 
     @classmethod
     def get_file_type(cls, file_path: str | None) -> str | None:
+        """拡張子から内部で使うファイル種別名を返す。"""
         if file_path is None:
             return None
         _, ext = os.path.splitext(file_path)
