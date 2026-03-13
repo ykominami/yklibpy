@@ -59,13 +59,16 @@ _export_classes_from_submodules()
 
 
 class Util:
-    """文字列処理、パス探索、表形式変換などの汎用処理を集約する。"""
+    """文字列処理、パス操作、表形式変換をまとめた汎用ユーティリティ群。
+
+    他モジュールから横断的に使う補助処理をクラスメソッド中心で提供する。
+    """
 
     class UniqueList(Generic[T]):
-        """重複を除きつつ追加順を保つリスト。"""
+        """重複を除きつつ追加順を保つ簡易コレクション。"""
 
         def __init__(self) -> None:
-            """内部の集合と順序付き配列を初期化する。"""
+            """重複判定用の集合と順序保持用の配列を初期化する。"""
             self._set: set[T] = set()
             self._list: list[T] = []
 
@@ -84,7 +87,7 @@ class Util:
             return repr(self._list)
 
     class Result:
-        """URL 検証結果を表す単純なデータ保持クラス。"""
+        """URL 検証の成否と補足情報を保持する入れ物。"""
 
         def __init__(
             self, success: bool, url: str, reason: str, parsed: ParseResult | None
@@ -119,7 +122,19 @@ class Util:
         pattern: str,
         target_type: TargetType = "both",
     ) -> list[Path]:
-        """再帰探索で条件に一致するパス一覧を返す。"""
+        """再帰探索で条件に一致するパス一覧を返す。
+
+        Args:
+            base_dir: 探索の起点にするディレクトリ。
+            pattern: `Path.rglob()` に渡す検索パターン。
+            target_type: 返却対象を file、dir、both から選ぶ。
+
+        Returns:
+            条件に一致したパスの一覧。
+
+        Raises:
+            ValueError: `base_dir` がディレクトリではない場合。
+        """
         if not base_dir.is_dir():
             raise ValueError(f"{base_dir} はディレクトリではありません")
 
@@ -142,7 +157,7 @@ class Util:
     @classmethod
     def xyz(cls) -> None:
         """簡易動作確認用に固定文字列を出力する。"""
-        print("xyz")
+        Loggerx.info("xyz", __name__)
 
     @classmethod
     def list_files(cls, name: str, parts: Sequence[str], suffix: str) -> list[str]:
@@ -151,7 +166,10 @@ class Util:
 
     @classmethod
     def is_valid_urls(cls, urls: List[str]) -> List["Util.Result"]:
-        """URL 一覧を検証し、各要素の結果を配列で返す。"""
+        """URL 一覧を検証し、各要素の結果を順番どおり返す。
+
+        無効な URL も例外にはせず、理由付きの `Result` として返す。
+        """
         result_array: list[Util.Result] = []
         for url in urls:
             if url == "" or url is None:
@@ -211,7 +229,10 @@ class Util:
 
     @classmethod
     def ensure_file_path(cls, path: Path | None) -> Path | None:
-        """ファイルと親ディレクトリの存在を保証して返す。"""
+        """ファイルと親ディレクトリの存在を保証して返す。
+
+        `path` が `None` の場合は何もせず、そのまま `None` を返す。
+        """
         if path is None:
             return None
         if not path.exists():
@@ -297,7 +318,18 @@ class Util:
     def load_tsv(
         cls, input_path: Path, fieldnames: Optional[Sequence[str]] = None
     ) -> list[dict[str, str]]:
-        """TSV ファイルを読み込み、行ごとの辞書配列へ変換する。"""
+        """TSV ファイルを読み込み、行ごとの辞書配列へ変換する。
+
+        Args:
+            input_path: 読み込む TSV ファイル。
+            fieldnames: ヘッダーを外部から与える場合の列名一覧。
+
+        Returns:
+            各行を辞書へ変換した配列。
+
+        Raises:
+            ValueError: ヘッダー行が存在せず `fieldnames` も指定されない場合。
+        """
         records: list[dict[str, str]] = []
         with open(input_path, "r", encoding="utf-8", newline="") as f:
             reader = csv.reader(f, delimiter="\t")
@@ -322,7 +354,19 @@ class Util:
         output_path: Optional[Path] = None,
         fieldnames: Optional[Sequence[str]] = None,
     ) -> str:
-        """辞書配列を TSV 文字列へ変換し、必要ならファイルへ出力する。"""
+        """辞書配列を TSV 文字列へ変換し、必要ならファイルへ保存する。
+
+        Args:
+            records: 出力対象の辞書配列。
+            output_path: 保存先ファイル。省略時は文字列だけを返す。
+            fieldnames: 出力列の順序を表すヘッダー一覧。
+
+        Returns:
+            生成した TSV 文字列。
+
+        Raises:
+            ValueError: `records` が空で `fieldnames` も指定されない場合。
+        """
         if not records and fieldnames is None:
             raise ValueError(
                 "fieldnamesを指定するか、recordsに1件以上のデータを含めてください。"
@@ -457,7 +501,20 @@ class Util:
     def array_to_dict(
         cls, data: list[dict[str, Any]], key: str
     ) -> dict[str, dict[str, Any]]:
-        """辞書配列を指定キーで引ける連想配列へ変換する。"""
+        """辞書配列を指定キーで参照できる連想配列へ変換する。
+
+        Args:
+            data: 変換対象の辞書配列。
+            key: 各要素から取り出して辞書キーに使う項目名。
+
+        Returns:
+            指定キーの値を文字列化して引ける辞書。
+
+        Raises:
+            TypeError: `data` に辞書以外の要素が含まれる場合。
+            KeyError: いずれかの要素に `key` が存在しない場合。
+            ValueError: `key` の値が辞書キーに変換できない型の場合。
+        """
         result: dict[str, dict[str, Any]] = {}
         for item in data:
             if not isinstance(item, dict):

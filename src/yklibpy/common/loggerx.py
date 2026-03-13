@@ -9,7 +9,7 @@ class Loggerx:
     _log_level: ClassVar[int] = logging.INFO
 
     @classmethod
-    def _set_log_level(cls, log_level: int = logging.INFO) -> None:
+    def set_log_level(cls, log_level: int = logging.INFO) -> None:
         """既定のログレベルを更新し、標準設定へ反映する。"""
         cls._log_level = log_level
         logging.basicConfig(level=cls._log_level)
