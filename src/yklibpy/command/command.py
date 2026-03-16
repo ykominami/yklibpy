@@ -56,16 +56,8 @@ class Command:
             )
             return result.stdout
         except subprocess.CalledProcessError as e:
-            logging.exception(e)
-            '''
-            raise subprocess.CalledProcessError(
-                returncode=e.returncode,
-                cmd=command,
-                output=e.stdout.decode("utf-8") if e.stdout else "",
-                stderr=e.stderr.decode("utf-8") if e.stderr else "",
-            )
-            '''
-        return "error"
+            logging.exception("command failed: %s", command)
+            raise
 
     def run_command_simple_with_count(
         self,
