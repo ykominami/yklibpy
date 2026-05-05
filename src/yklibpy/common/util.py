@@ -64,6 +64,8 @@ class Util:
     他モジュールから横断的に使う補助処理をクラスメソッド中心で提供する。
     """
 
+    WINDOWS_RESERVED_PATTERN = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+
     class UniqueList(Generic[T]):
         """重複を除きつつ追加順を保つ簡易コレクション。"""
 
@@ -538,6 +540,17 @@ class Util:
     def swap_dict(cls, dict: dict[str, str]) -> dict[str, str]:
         """キーと値を入れ替えた辞書を返す。"""
         return {v: k for k, v in dict.items()} if dict else {}
+
+    @classmethod
+    def sanitize_dir_name(cls, name: str) -> str:
+        """gist 名を Windows でも使えるディレクトリ名へ正規化する。
+
+        禁止文字を `_` に置換し、空文字になった場合は `_none` を返す。
+        """
+        sanitized = Util.WINDOWS_RESERVED_PATTERN.sub("_", name).strip().rstrip(".")
+        if not sanitized:
+            return "_none"
+        return sanitized
 
 if __name__ == "__main__":
     # test_util = Util()
