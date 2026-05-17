@@ -4,7 +4,10 @@
       "Bash(uv run mypy:*)",
       "Bash(python -m mypy:*)",
       "Bash(py -m mypy src)",
-      "Bash(.venv/Scripts/mypy src)"
+      "Bash(.venv/Scripts/mypy src)",
+      "Bash(git diff *)",
+      "Bash(git checkout *)",
+      "Bash(git add *)"
     ]
   },
   "outputStyle": "default"
