@@ -47,16 +47,24 @@ def db_yaml(db_file: str) -> DbYaml:
     return db
 
 
-def xmain() -> str:
-    """db パッケージの疎通確認用メッセージを返す。"""
-    Loggerx.debug("Hello from yklibpy.db!", __name__)
-    return "Hello from yklibpy.db!"
+def db_yaml_main() -> None:
+    """db_yaml_x を呼び出す CLI 用のエントリポイント。"""
+    db = db_yaml_x()
+    Loggerx.debug(f"Loaded DB: {db}", __name__)
 
 
-def ymain() -> str:
-    """db パッケージの別系統の疎通確認用メッセージを返す。"""
-    Loggerx.debug("Y Hello from yklibpy.db!", __name__)
-    return "Y Hello from yklibpy.db!"
+def xmain() -> None:
+    """db パッケージの疎通確認用メッセージを出力する。"""
+    msg = "Hello from yklibpy.db!"
+    Loggerx.debug(msg, __name__)
+    print(msg)
+
+
+def ymain() -> None:
+    """db パッケージの別系統の疎通確認用メッセージを出力する。"""
+    msg = "Y Hello from yklibpy.db!"
+    Loggerx.debug(msg, __name__)
+    print(msg)
 
 
 if __name__ == "__main__":
