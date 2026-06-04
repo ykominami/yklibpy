@@ -6,16 +6,18 @@ from yklibpy.common.loggerx import Loggerx
 __all__ = ["Command", "CommandGhUser", "FetchCount", "xmain", "ymain"]
 
 
-def xmain() -> str:
-    """command パッケージの疎通確認用メッセージを返す。"""
-    Loggerx.debug("Hello from yklibpy.command!", __name__)
-    return "Hello from yklibpy.command!"
+def xmain() -> None:
+    """command パッケージの疎通確認用メッセージを出力する。"""
+    msg = "Hello from yklibpy.command!"
+    Loggerx.debug(msg, __name__)
+    print(msg)
 
 
-def ymain() -> str:
-    """command パッケージの別系統の疎通確認用メッセージを返す。"""
-    Loggerx.debug("Y Hello from yklibpy.command!", __name__)
-    return "Y Hello from yklibpy.command!"
+def ymain() -> None:
+    """command パッケージの別系統の疎通確認用メッセージを出力する。"""
+    msg = "Y Hello from yklibpy.command!"
+    Loggerx.debug(msg, __name__)
+    print(msg)
 
 
 if __name__ == "__main__":
