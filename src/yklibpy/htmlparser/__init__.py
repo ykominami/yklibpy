@@ -14,16 +14,14 @@ __all__ = [
 ]
 
 
-def xmain() -> str:
-    """HTML パーサパッケージの疎通確認用メッセージを返す。"""
+def xmain() -> None:
+    """HTML パーサパッケージの疎通確認を行う。"""
     Loggerx.debug("Hello from yklibpy!", __name__)
-    return "Hello from yklibpy!"
 
 
-def ymain() -> str:
-    """HTML パーサパッケージの別系統の疎通確認用メッセージを返す。"""
+def ymain() -> None:
+    """HTML パーサパッケージの別系統の疎通確認を行う。"""
     Loggerx.debug("Y Hello from yklibpy!", __name__)
-    return "Y Hello from yklibpy!"
 
 
 if __name__ == "__main__":
