@@ -15,7 +15,7 @@ __all__ = [
 
 
 def xmain() -> None:
-    """HTML パーサパッケージの疎通確認用メッセージを返す。"""
+    """HTML パーサパッケージの疎通確認を行う。"""
     Loggerx.debug("Hello from yklibpy!", __name__)
 
 
