@@ -15,8 +15,10 @@ __all__ = [
 
 def xmain() -> str:
     """tomlop パッケージの疎通確認用メッセージを返す。"""
-    Loggerx.debug("Hello from yklibpy.tomlop!", __name__)
-    return "Hello from yklibpy.tomlop!"
+    msg = "Hello from yklibpy.tomlop!"
+    print(msg)
+    Loggerx.debug(msg, __name__)
+    return msg
 
 
 def ymain() -> str:
