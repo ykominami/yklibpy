@@ -13,18 +13,16 @@ __all__ = [
 ]
 
 
-def xmain() -> str:
+def xmain() -> None:
     """tomlop パッケージの疎通確認用メッセージを返す。"""
     msg = "Hello from yklibpy.tomlop!"
     print(msg)
     Loggerx.debug(msg, __name__)
-    return msg
 
 
-def ymain() -> str:
+def ymain() -> None:
     """tomlop パッケージの別系統の疎通確認用メッセージを返す。"""
     Loggerx.debug("Y Hello from yklibpy.tomlop!", __name__)
-    return "Y Hello from yklibpy.tomlop!"
 
 
 if __name__ == "__main__":

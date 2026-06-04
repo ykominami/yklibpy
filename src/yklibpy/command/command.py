@@ -55,7 +55,7 @@ class Command:
                 encoding="utf-8",
             )
             return result.stdout
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             logging.exception("command failed: %s", command)
             raise
 
