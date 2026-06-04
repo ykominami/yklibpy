@@ -21,7 +21,7 @@ def xmain() -> None:
 
 
 def ymain() -> None:
-    """tomlop パッケージの別系統の疎通確認用メッセージを返す。"""
+    """tomlop パッケージの別系統の疎通確認を行う。"""
     Loggerx.debug("Y Hello from yklibpy.tomlop!", __name__)
 
 

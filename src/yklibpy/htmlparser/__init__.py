@@ -15,12 +15,12 @@ __all__ = [
 
 
 def xmain() -> None:
-    """HTML パーサパッケージの疎通確認用メッセージを返す。"""
+    """HTML パーサパッケージの疎通確認を行う。"""
     Loggerx.debug("Hello from yklibpy!", __name__)
 
 
 def ymain() -> None:
-    """HTML パーサパッケージの別系統の疎通確認用メッセージを返す。"""
+    """HTML パーサパッケージの別系統の疎通確認を行う。"""
     Loggerx.debug("Y Hello from yklibpy!", __name__)
 
 
