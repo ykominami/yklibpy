@@ -11,9 +11,9 @@ __all__ = ["Env", "Info", "Util", "UtilYaml", "UtilJson", "SafeDict", "Timex"]
 
 
 def xmain() -> None:
-    """`common` パッケージの動作確認用メッセージを返す。
+    """common パッケージの動作確認を行う。
 
-    ログ出力と戻り値の両方で疎通確認できるようにする。
+    ログ出力で疎通確認できるようにする。
     """
     Loggerx.debug("Hello from yklibpy!", __name__)
 
