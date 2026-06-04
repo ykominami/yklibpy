@@ -66,7 +66,7 @@ yklibpy-yaml2toml = "yklibpy.tomlop:yaml2toml"
 # db
 yklibpy-db-xmain = "yklibpy.db:xmain"
 yklibpy-db-ymain = "yklibpy.db:ymain"
-yklibpy-db-yaml = "yklibpy.db:db_yaml_x"
+yklibpy-db-yaml = "yklibpy.db:db_yaml_main"
 # cli
 yklibpy-cli-xmain = "yklibpy.cli:xmain"
 yklibpy-cli-ymain = "yklibpy.cli:ymain"
