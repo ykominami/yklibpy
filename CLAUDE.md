@@ -22,7 +22,7 @@ yklibpy is a Python utility library focused on HTML parsing/scraping, data forma
 
 ### Building and Testing
 - Build package: `uv build` or `hatch build`
-- Run tests: `uv run pytest` (test directory: `tests/`, configured in pyproject.toml)
+- Run tests: `uv run pytest` (test directory: `tests/`, configured in pyproject.toml — directory does not exist yet)
 - Run a single test: `uv run pytest tests/test_foo.py` or `uv run pytest tests/test_foo.py::test_bar`
 - Run with coverage: `uv run pytest --cov`
 
@@ -46,8 +46,7 @@ The library is organized into seven modules:
 - `Loggerx`: Centralized logging wrapper — use `Loggerx.debug(msg, __name__)` etc. throughout the codebase instead of direct `logging` calls. Log level defaults to INFO; call `Loggerx.set_log_level(logging.DEBUG)` to enable debug output.
 
 #### 2. `htmlparser/` - Web Scraping Framework
-- **Base Class**: `Scraper` - core scraping logic with link extraction and deduplication
-- **Concrete Scrapers**: `UdemyScraper`, `KUScraper`, `AmazonSavedCartScraper`, `FanzaDoujinPurchasedScraper`, `FanzaDoujinBasketScraper`
+- **Base Class**: `Scraper` - core scraping logic with link extraction and deduplication. Site-specific scrapers inherit from this class.
 - **App**: Factory/orchestrator that creates the appropriate scraper based on a mode string from configuration. Processes HTML via BeautifulSoup (bs4 + html5lib parser, not lxml).
 - **Supporting**: `HtmlOp`, `Preparex`, `ConfigPrepare`, `Progress`, and `misc/` helpers (`AnchorTagInfo`, `AnchorTagx`, `PriceInfo`, `Tagx`)
 
@@ -94,6 +93,10 @@ The library is organized into seven modules:
 ### Ruff Configuration
 - Ignores E501 (line length) — no line length enforcement
 - Checks: E (pycodestyle errors), F (pyflakes), I (isort), N (naming)
+
+### Documentation
+- Module-level docs live in `docs/` (one `.md` per class), mirroring the `src/yklibpy/` structure.
+- In-progress work specs are in `_private/` (e.g., `add_comment-spec.md`, `add_type_hint-spec.md`).
 
 ### Docstring Convention
 The canonical spec is `jp-docstring-spec.md` at the repo root. Key rules:

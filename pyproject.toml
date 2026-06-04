@@ -51,18 +51,31 @@ Homepage = "https://github.com/ykominami/yklibpy"
 Repository = "https://github.com/ykominami/yklibpy"
 
 [project.scripts]
-# yklibpy-tomlop = "yklibpy:tomlop.main"
-tomlop-ymain = "htmlparser:ymain"
-# yklibpy-main = "yklibpy:main"
-yklibpy-xmain = "yklibpy:xmain"
-yklibpy-ymain = "yklibpy:htmlparser.ymain"
-yklibpy-app = "yklibpy:htmlparser.app.ymain"
-yklibpy-tomlop = "yklibpy:tomlop.xmain"
-yklibpy-zmain = "yklibpy:tomlop.zmain"
-yklibpy-toml2yaml = "yklibpy:tomlop.toml2yaml"
-yklibpy-yaml2toml = "yklibpy:tomlop.yaml2toml"
-# yklibpy-serve = "yklibpy_diff:server.main
-yklibpy-db_yaml = "yklibpy.db:db_yaml"
+# common
+yklibpy-common-xmain = "yklibpy.common:xmain"
+yklibpy-common-ymain = "yklibpy.common:ymain"
+# htmlparser
+yklibpy-htmlparser-xmain = "yklibpy.htmlparser:xmain"
+yklibpy-htmlparser-ymain = "yklibpy.htmlparser:ymain"
+# tomlop
+yklibpy-tomlop-xmain = "yklibpy.tomlop:xmain"
+yklibpy-tomlop-ymain = "yklibpy.tomlop:ymain"
+yklibpy-tomlop-zmain = "yklibpy.tomlop:zmain"
+yklibpy-toml2yaml = "yklibpy.tomlop:toml2yaml"
+yklibpy-yaml2toml = "yklibpy.tomlop:yaml2toml"
+# db
+yklibpy-db-xmain = "yklibpy.db:xmain"
+yklibpy-db-ymain = "yklibpy.db:ymain"
+yklibpy-db-yaml = "yklibpy.db:db_yaml_main"
+# cli
+yklibpy-cli-xmain = "yklibpy.cli:xmain"
+yklibpy-cli-ymain = "yklibpy.cli:ymain"
+# command
+yklibpy-command-xmain = "yklibpy.command:xmain"
+yklibpy-command-ymain = "yklibpy.command:ymain"
+# config
+yklibpy-config-xmain = "yklibpy.config:xmain"
+yklibpy-config-ymain = "yklibpy.config:ymain"
 
 [tool.pytest.ini_options]
 addopts = "-ra -q"

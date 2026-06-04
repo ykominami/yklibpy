@@ -1,8 +1,8 @@
 from yklibpy.common.loggerx import Loggerx
+from yklibpy.db.appstore import AppStore
 from yklibpy.db.db_base import DbBase
 from yklibpy.db.db_yaml import DbYaml
 from yklibpy.db.storex import Storex
-from yklibpy.db.appstore import AppStore
 
 __all__ = [
     "DbBase",
@@ -12,6 +12,8 @@ __all__ = [
     "get_or_create_db",
     "db_yaml",
     "db_yaml_x",
+    "xmain",
+    "ymain",
 ]
 
 
@@ -43,6 +45,26 @@ def db_yaml(db_file: str) -> DbYaml:
     db.load()
     db.set_item("name", "John")
     return db
+
+
+def db_yaml_main() -> None:
+    """db_yaml_x を呼び出す CLI 用のエントリポイント。"""
+    db = db_yaml_x()
+    Loggerx.debug(f"Loaded DB: {db}", __name__)
+
+
+def xmain() -> None:
+    """db パッケージの疎通確認用メッセージを出力する。"""
+    msg = "Hello from yklibpy.db!"
+    Loggerx.debug(msg, __name__)
+    print(msg)
+
+
+def ymain() -> None:
+    """db パッケージの別系統の疎通確認用メッセージを出力する。"""
+    msg = "Y Hello from yklibpy.db!"
+    Loggerx.debug(msg, __name__)
+    print(msg)
 
 
 if __name__ == "__main__":
