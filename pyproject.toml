@@ -1,12 +1,12 @@
 [project]
 name = "yklibpy"
-version = "0.2.13"
-description = "Utilty Library by ykominami"
+version = "0.2.14"
+description = "Python utility library for HTML scraping, TOML/YAML conversion, and app storage management"
 readme = "README.md"
 authors = [
     { name = "Yasuo Kominami"}
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
     "bs4>=0.0.2",
     "chardet>=5.2.0",
