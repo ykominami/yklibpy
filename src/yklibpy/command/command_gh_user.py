@@ -5,8 +5,6 @@ from yklibpy.common.util import Util
 class CommandGhUser(Command):
     """GitHub CLI からログインユーザー名を取得する。"""
 
-    DEFAULT_VALUE_USER = None
-
     def __init__(self) -> None:
         """親クラス互換の空初期化を行う。"""
         pass

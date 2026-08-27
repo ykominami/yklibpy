@@ -21,7 +21,11 @@ class Command:
         encoding: str = "utf-8",
         timeout: Optional[int] = None,
     ) -> tuple[str, int]:
-        """コマンドを実行し、標準出力と終了コードを返す。"""
+        """コマンドを実行し、標準出力と終了コードを返す。
+
+        呼び出し先コマンドの標準出力に指定エンコーディングで不正なバイト列が
+        含まれていても例外にせず、置換文字（U+FFFD）に置き換えて継続する。
+        """
         try:
             result = subprocess.run(
                 command,
@@ -29,6 +33,7 @@ class Command:
                 capture_output=True,
                 text=True,
                 encoding=encoding,
+                errors="replace",
                 timeout=timeout,
             )
             return result.stdout, result.returncode
@@ -44,7 +49,11 @@ class Command:
             raise
 
     def run_command_simple(self, command: str | list[str], shell: bool = False) -> str:
-        """終了コードを検査しながらコマンドを実行し、標準出力を返す。"""
+        """終了コードを検査しながらコマンドを実行し、標準出力を返す。
+
+        標準出力に UTF-8 として不正なバイト列が含まれていても例外にせず、
+        置換文字（U+FFFD）に置き換えて継続する。
+        """
         try:
             result = subprocess.run(
                 command,
@@ -53,6 +62,7 @@ class Command:
                 text=True,
                 check=True,
                 encoding="utf-8",
+                errors="replace",
             )
             return result.stdout
         except subprocess.CalledProcessError:
@@ -82,8 +92,8 @@ class Command:
 
     def get_next_count(self, appstore: AppStore) -> int:
         """保存済みの実行履歴から次の連番を採番して記録する。"""
-        fetch_assoc_any = appstore.get_file_assoc_from_db(AppConfig.BASE_NAME_FETCH)
-        fetch_assoc = cast(dict[str, str] | None, fetch_assoc_any)
+        fetch_result = appstore.get_file_assoc_from_db(AppConfig.BASE_NAME_FETCH)
+        fetch_assoc = cast(dict[str, str] | None, fetch_result.value) if fetch_result.ok else None
 
         if not fetch_assoc:
             next_count = 1
