@@ -1,3 +1,5 @@
+from typing import cast
+
 from yklibpy.common.timex import Timex
 from yklibpy.config.appconfig import AppConfig
 from yklibpy.db.appstore import AppStore
@@ -19,7 +21,8 @@ class FetchCount:
             self.fetch_count = self.get_next_count()
         # Githubからダウンロードが必要ない場合は、既存のダウンロード先ディレクトリのうち、最新のものを取得（ダウンロード先ディレクトリは、ダウンロード回数をディレクトリ名として持つ）
         else:
-            fetch_assoc = self.appstore.get_file_assoc_from_db(AppConfig.BASE_NAME_FETCH)
+            result = self.appstore.get_file_assoc_from_db(AppConfig.BASE_NAME_FETCH)
+            fetch_assoc = cast(dict[str, str], result.value) if result.ok and result.value is not None else {}
             self.fetch_count = 1
             for k in fetch_assoc.keys():
                 try:
@@ -37,7 +40,8 @@ class FetchCount:
 
     def get_next_count(self) -> int:
         """DB の履歴を更新しながら次の取得回数を返す。"""
-        fetch_assoc = self.appstore.get_file_assoc_from_db(AppConfig.BASE_NAME_FETCH)
+        result = self.appstore.get_file_assoc_from_db(AppConfig.BASE_NAME_FETCH)
+        fetch_assoc = cast(dict[str, str] | None, result.value) if result.ok else None
         count, self.fetch_assoc = self._next_count(fetch_assoc)
         return count
 

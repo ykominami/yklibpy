@@ -283,6 +283,20 @@ class Util:
         return enc
 
     @classmethod
+    def decode_cli_output(cls, data: bytes | None) -> str:
+        """CLI のバイト列出力を文字列へデコードする。"""
+        if not data:
+            return ""
+        for encoding in ("utf-8", "cp932", locale.getpreferredencoding(False)):
+            if not encoding:
+                continue
+            try:
+                return data.decode(encoding)
+            except (UnicodeDecodeError, LookupError):
+                continue
+        return data.decode("utf-8", errors="replace")
+
+    @classmethod
     def get_common_parents(cls, element1: Tag, element2: Tag) -> List[Tag]:
         """2 つの BeautifulSoup 要素に共通する親タグ一覧を返す。"""
 

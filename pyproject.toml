@@ -1,6 +1,6 @@
 [project]
 name = "yklibpy"
-version = "0.2.14"
+version = "0.2.15"
 description = "Python utility library for HTML scraping, TOML/YAML conversion, and app storage management"
 readme = "README.md"
 authors = [
