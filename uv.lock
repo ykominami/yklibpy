@@ -1,6 +1,6 @@
 version = 1
 revision = 3
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 
 [[package]]
 name = "anyio"
@@ -1153,7 +1153,7 @@ wheels = [
 
 [[package]]
 name = "yklibpy"
-version = "0.2.14"
+version = "0.2.15"
 source = { editable = "." }
 dependencies = [
     { name = "bs4" },
